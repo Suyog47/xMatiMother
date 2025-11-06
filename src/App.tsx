@@ -10,7 +10,6 @@ import AdminControl from './components/AdminControl/AdminControl';
 
 function App() {
   const [isSubscriptionOpen, setSubscriptionOpen] = useState(false);
-  const [isAdminOpen, setAdminOpen] = useState(false);
 
   return (
     <Router>
@@ -18,19 +17,13 @@ function App() {
         <header className="App-header">
           <h1>xMati Mother Application</h1>
           <nav className="nav-menu">
-            <Link to="/" className="nav-link">Home</Link>
-            <Link to="/wizard" className="nav-link">Registration Wizard</Link>
+            <Link to="/wizard" className="nav-link" target="_blank" rel="noopener noreferrer">Registration Wizard</Link>
+            <Link to="/admin" className="nav-link" target="_blank" rel="noopener noreferrer">Admin Control Panel</Link>
             <button 
               className="nav-link nav-button" 
               onClick={() => setSubscriptionOpen(true)}
             >
               Subscription Management
-            </button>
-            <button 
-              className="nav-link nav-button" 
-              onClick={() => setAdminOpen(true)}
-            >
-              Admin Control Panel
             </button>
           </nav>
         </header>
@@ -38,42 +31,13 @@ function App() {
         <main className="App-main">
           <Switch>
             <Route exact path="/">
-              <div className="home-content">
-                <h2>Welcome to xMati Mother</h2>
-                <p>This application demonstrates three main features:</p>
-                <div className="feature-cards">
-                  <div className="feature-card">
-                    <h3>📝 Registration Wizard</h3>
-                    <p>Multi-step registration process with email verification, organization info, and payment setup</p>
-                    <Link to="/wizard">
-                      <button className="feature-button">Go to Wizard</button>
-                    </Link>
-                  </div>
-                  <div className="feature-card">
-                    <h3>💳 Subscription Management</h3>
-                    <p>Manage subscription plans, process payments, view transaction history</p>
-                    <button 
-                      className="feature-button"
-                      onClick={() => setSubscriptionOpen(true)}
-                    >
-                      Open Subscription
-                    </button>
-                  </div>
-                  <div className="feature-card">
-                    <h3>⚙️ Admin Control Panel</h3>
-                    <p>Manage users, handle maintenance, backup/restore, and view enquiries</p>
-                    <button 
-                      className="feature-button"
-                      onClick={() => setAdminOpen(true)}
-                    >
-                      Open Admin Panel
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <MainScreen />
             </Route>
             <Route path="/wizard">
               <MainScreen />
+            </Route>
+            <Route path="/admin">
+              <AdminControl />
             </Route>
           </Switch>
         </main>
@@ -82,12 +46,6 @@ function App() {
         <Subscription 
           isOpen={isSubscriptionOpen} 
           toggle={() => setSubscriptionOpen(!isSubscriptionOpen)} 
-        />
-
-        {/* Admin Control Dialog */}
-        <AdminControl 
-          isOpen={isAdminOpen} 
-          toggle={() => setAdminOpen(!isAdminOpen)} 
         />
       </div>
     </Router>

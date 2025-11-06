@@ -1,4 +1,4 @@
-import { Dialog, Button, Spinner, Card, Elevation } from '@blueprintjs/core'
+import { Button, Spinner, Card, Elevation } from '@blueprintjs/core'
 import { toast } from '../../utils/shared'
 import ms from 'ms'
 import React, { FC, useEffect, useState, useCallback } from 'react'
@@ -8,11 +8,6 @@ import UserCard from './UserCard'
 
 const packageJson = { version: '100.0.0' }
 
-interface Props {
-  isOpen: boolean
-  toggle: () => void
-}
-
 interface UserData {
   email: string
   [key: string]: any // Add more fields as needed
@@ -21,11 +16,10 @@ interface UserData {
 const CURRENT_VERSION = packageJson.version
 const API_URL = process.env.REACT_APP_API_URL || 'https://www.app.xmati.ai/apis'
 
-const AdminControl: FC<Props> = ({ isOpen, toggle }) => {
+const AdminControl: FC = () => {
   const savedFormData = JSON.parse(localStorage.getItem('formData') || '{}')
-  const token = JSON.parse(localStorage.getItem('token') || '{}')
   const maintenanceStatus = JSON.parse(localStorage.getItem('maintenance') || '{}')
-  const [isDialogLoading, setDialogLoading] = useState(false)
+  const [isLoading, setLoading] = useState(false)
   const [isMaintenanceActive, setMaintenanceActive] = useState(maintenanceStatus.status)
   const [userList, setUserList] = useState<UserData[]>([])
   const [isEnquiryDialogOpen, setEnquiryDialogOpen] = useState(false)
@@ -33,7 +27,7 @@ const AdminControl: FC<Props> = ({ isOpen, toggle }) => {
   const toggleEnquiryDialog = () => setEnquiryDialogOpen((prev: boolean) => !prev)
 
   const getAllUsers = useCallback(async () => {
-    setDialogLoading(true)
+    setLoading(true)
     try {
       const response = await fetch(`${API_URL}/get-all-users-subscriptions`, {
         method: 'GET',
@@ -49,19 +43,17 @@ const AdminControl: FC<Props> = ({ isOpen, toggle }) => {
     } catch (error) {
       toast.failure('Failed to fetch user list.')
     } finally {
-      setDialogLoading(false)
+      setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    if (isOpen) {
-      void getAllUsers()
-    }
-  }, [isOpen, getAllUsers])
+    void getAllUsers()
+  }, [getAllUsers])
 
 
   const handleBackup = async () => {
-    setDialogLoading(true)
+    setLoading(true)
     try {
       const ids = savedFormData.botIdList
       await api.getSecured({ timeout: ms('8m') }).post('/admin/workspace/bots/saveAllBots', { ids })
@@ -70,12 +62,12 @@ const AdminControl: FC<Props> = ({ isOpen, toggle }) => {
       console.error('Error during backup:', error)
       alert('Failed to backup to S3.')
     } finally {
-      setDialogLoading(false)
+      setLoading(false)
     }
   }
 
   const handleRetrieval = async () => {
-    setDialogLoading(true)
+    setLoading(true)
     try {
       await api.getSecured({ timeout: ms('8m') }).post('/admin/workspace/bots/getAllBots')
       alert('Retrieval from S3 completed successfully!')
@@ -86,12 +78,12 @@ const AdminControl: FC<Props> = ({ isOpen, toggle }) => {
       console.error('Error during retrieval:', error)
       alert('Failed to retrieve from S3.')
     } finally {
-      setDialogLoading(false)
+      setLoading(false)
     }
   }
 
   const handleMaintenance = async () => {
-    setDialogLoading(true)
+    setLoading(true)
     try {
       const response = await fetch(`${API_URL}/set-maintenance`, {
         method: 'POST',
@@ -107,53 +99,62 @@ const AdminControl: FC<Props> = ({ isOpen, toggle }) => {
         alert(`Failed to toggle maintenance mode: ${result.msg}`)
       }
     } finally {
-      setDialogLoading(false)
+      setLoading(false)
     }
   }
 
   return (
-    <Dialog
-      isOpen={isOpen}
-      onClose={toggle}
-      title="Admin Control Panel"
-      canOutsideClickClose={false}
-       style={{
-        width: '98vw',
-        maxWidth: '100vw',
-        height: '93vh',
-        maxHeight: '93vh',
-        padding: 0,
-        borderTopLeftRadius: 10,
-        borderTopRightRadius: 10,
-        borderBottomLeftRadius: 10,
-        borderBottomRightRadius: 10,
-       }}
-    >
-        {isDialogLoading && (
+    <div style={{ 
+      minHeight: '100vh',
+      backgroundColor: '#f5f8fa',
+      padding: '20px'
+    }}>
+      <div style={{
+        maxWidth: '1400px',
+        margin: '0 auto',
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        overflow: 'hidden'
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: '24px 32px',
+          borderBottom: '1px solid #e1e8ed',
+          backgroundColor: '#ffffff'
+        }}>
+          <h1 style={{ 
+            margin: 0, 
+            fontSize: '28px', 
+            fontWeight: 600, 
+            color: '#2d3748' 
+          }}>
+            Admin Control Panel
+          </h1>
+        </div>
+
+        {isLoading && (
           <div
             style={{
-              position: 'absolute',
+              position: 'fixed',
               top: 0,
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'rgba(255, 255, 255, 0.7)',
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              zIndex: 10,
+              zIndex: 1000,
             }}
           >
             <Spinner size={50} />
           </div>
         )}
-      <div className="bp3-dialog-body">
+
         <div style={{ 
           display: 'flex', 
-          height: '93vh',
-          width: '98vw',
-          maxWidth: '100vw',
-          maxHeight: '93vh',
+          minHeight: 'calc(100vh - 140px)',
           overflow: 'hidden'
         }}>
         {/* Left Panel - Admin Actions */}
@@ -189,7 +190,7 @@ const AdminControl: FC<Props> = ({ isOpen, toggle }) => {
               icon="cloud-upload"
               intent="primary"
               onClick={handleBackup}
-              disabled={isDialogLoading}
+              disabled={isLoading}
               style={{
                 height: '40px',
                 fontSize: '14px',
@@ -217,7 +218,7 @@ const AdminControl: FC<Props> = ({ isOpen, toggle }) => {
               icon="cloud-download"
               intent="success"
               onClick={handleRetrieval}
-              disabled={isDialogLoading}
+              disabled={isLoading}
               style={{
                 height: '40px',
                 fontSize: '14px',
@@ -245,7 +246,7 @@ const AdminControl: FC<Props> = ({ isOpen, toggle }) => {
               icon="wrench"
               intent="warning"
               onClick={handleMaintenance}
-              disabled={isDialogLoading}
+              disabled={isLoading}
               style={{
                 height: '40px',
                 fontSize: '14px',
@@ -285,7 +286,7 @@ const AdminControl: FC<Props> = ({ isOpen, toggle }) => {
               icon="chat"
               intent="primary"
               onClick={toggleEnquiryDialog}
-              disabled={isDialogLoading}
+              disabled={isLoading}
               style={{
                 height: '40px',
                 fontSize: '14px',
@@ -352,7 +353,7 @@ const AdminControl: FC<Props> = ({ isOpen, toggle }) => {
           onClose={toggleEnquiryDialog}
         />
       </div>
-    </Dialog>
+    </div>
   )
 }
 
