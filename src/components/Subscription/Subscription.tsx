@@ -1,11 +1,8 @@
-import { Dialog, Button, FormGroup, Icon, Spinner } from '@blueprintjs/core'
+import { Dialog, Button, Icon } from '@blueprintjs/core'
 import {
   Elements,
-  useStripe,
-  useElements,
-  PaymentRequestButtonElement,
 } from '@stripe/react-stripe-js'
-import { loadStripe, PaymentRequest } from '@stripe/stripe-js'
+import { loadStripe } from '@stripe/stripe-js'
 import React, { FC, useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import CheckoutForm from './CheckoutForm'
 import CancellationFailedDialog from './dialogs/CancellationFailedDialog'
@@ -16,20 +13,19 @@ import SubscriptionCancelConfirmDialog from './dialogs/SubscriptionCancelConfirm
 import SubscriptionCancelledDialog from './dialogs/SubscriptionCancelledDialog'
 import TransactionHistory from './TransactionHistory'
 
-interface Props {
-  isOpen: boolean
-  toggle: () => void
-}
-
 const CURRENT_VERSION = '100.0.0'
 const API_URL = process.env.REACT_APP_API_URL || 'https://www.app.xmati.ai/apis'
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PROMISE || 'pk_live_51RPPI0EncrURrNgDF2LNkLrh5Wf53SIe3WjqPqjtzqbJWDGfDFeG4VvzUXuC4nCmrPTNOTeFENuAqRBw1mvbNJg600URDxPnuc')
 
-const Subscription: FC<Props> = ({ isOpen, toggle }) => {
+const Subscription: FC = () => {
   let savedFormData = JSON.parse(localStorage.getItem('formData') || '{}')
   const savedSubData = JSON.parse(localStorage.getItem('subData') || '{}')
   const token = JSON.parse(localStorage.getItem('token') || '{}')
+
+  console.log(savedFormData, savedSubData)
+  // Dummy toggle function for compatibility with existing dialogs
+  const toggle = () => {}
 
   const [actualAmount, setActualAmount] = useState<any>(null)
   const [clientSecret, setClientSecret] = useState<string>('')
@@ -211,42 +207,20 @@ const Subscription: FC<Props> = ({ isOpen, toggle }) => {
     }
   }, [amount, selectedDuration, isPaymentDialogOpen])
 
-
-  const fetchedOnceRef = useRef(false)
-  useEffect(() => {
-    if (isOpen) {
-      void getClientSecret()
-
-      if (!fetchedOnceRef.current) {
-        void fetchTransactions()
-        fetchedOnceRef.current = true
-      }
-    }
-
-    setSubscription(savedSubData.subscription || '')
-
-    const formattedExpiryTill = savedSubData.till
-      ? new Date(savedSubData.till).toLocaleString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
-      : ''
-    setExpiryTill(formattedExpiryTill)
-  }, [isOpen, getClientSecret])
-
-
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     setIsLoadingTransactions(true)
     try {
+      const savedFormDataLocal = JSON.parse(localStorage.getItem('formData') || '{}')
+      const tokenLocal = JSON.parse(localStorage.getItem('token') || '{}')
+
       const res = await fetch(`${API_URL}/get-stripe-transactions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${tokenLocal}`,
           'X-App-Version': CURRENT_VERSION
         },
-        body: JSON.stringify({ email: savedFormData.email })
+        body: JSON.stringify({ email: savedFormDataLocal.email })
       })
 
       const data = await res.json()
@@ -261,7 +235,8 @@ const Subscription: FC<Props> = ({ isOpen, toggle }) => {
 
       const latestCharge = data?.charges?.[0]
       if (latestCharge?.id) {
-        localStorage.setItem('subData', JSON.stringify({ ...savedSubData, transactionId: latestCharge.id }))
+        const existingSubData = JSON.parse(localStorage.getItem('subData') || '{}')
+        localStorage.setItem('subData', JSON.stringify({ ...existingSubData, transactionId: latestCharge.id }))
       }
 
       if (data.charges) {
@@ -273,7 +248,28 @@ const Subscription: FC<Props> = ({ isOpen, toggle }) => {
     } finally {
       setIsLoadingTransactions(false)
     }
-  }
+  }, [])
+  
+  const fetchedOnceRef = useRef(false)
+  useEffect(() => {
+    void getClientSecret()
+
+    if (!fetchedOnceRef.current) {
+      void fetchTransactions()
+      fetchedOnceRef.current = true
+    }
+
+    setSubscription(savedSubData.subscription || '')
+
+    const formattedExpiryTill = savedSubData.till
+      ? new Date(savedSubData.till).toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+      : ''
+    setExpiryTill(formattedExpiryTill)
+  }, [getClientSecret, savedSubData.subscription, savedSubData.till, fetchTransactions])
 
   const downloadCSV = async () => {
     const email = savedFormData.email
@@ -581,35 +577,53 @@ const Subscription: FC<Props> = ({ isOpen, toggle }) => {
 
   return (
     <>
-      {/* Main Screen dialog */}
-      <Dialog
-        title="Subscribe & Pay"
-        icon="dollar"
-        isOpen={isOpen}
-        onClose={toggle}
-        canOutsideClickClose={false}
-        style={{
-          width: '98vw',
-          maxWidth: '100vw',
-          height: 'auto',
-          maxHeight: '97vh',
-          margin: 0,
-          borderRadius: 10,
-        }}
-      >
-        <div
-          style={{
+      {/* Main Screen */}
+      <div style={{ 
+        minHeight: '100vh',
+        backgroundColor: '#f5f8fa',
+        padding: '20px'
+      }}>
+        <div style={{
+          maxWidth: '1400px',
+          margin: '0 auto',
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          overflow: 'hidden'
+        }}>
+          {/* Header */}
+          <div style={{
+            padding: '24px 32px',
+            borderBottom: '1px solid #e1e8ed',
+            backgroundColor: '#ffffff',
             display: 'flex',
-            flexDirection: 'row',
-            height: '100%',
-            padding: 32,
-            paddingTop: 20,
-            paddingLeft: 32,
-            paddingRight: 32,
-            paddingBottom: 32,
-            gap: 20,
-          }}
-        >
+            alignItems: 'center',
+            gap: '12px'
+          }}>
+            <Icon icon="dollar" size={28} color="#2d3748" />
+            <h1 style={{ 
+              margin: 0, 
+              fontSize: '28px', 
+              fontWeight: 600, 
+              color: '#2d3748' 
+            }}>
+              Subscribe & Pay
+            </h1>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              minHeight: 'calc(100vh - 140px)',
+              padding: 32,
+              paddingTop: 20,
+              paddingLeft: 32,
+              paddingRight: 32,
+              paddingBottom: 32,
+              gap: 20,
+            }}
+          >
           {/* Left: Subscription Plan Section */}
           <div style={{ flex: 1.8, overflowY: 'auto' }}>
             <div
@@ -820,7 +834,9 @@ const Subscription: FC<Props> = ({ isOpen, toggle }) => {
             downloadCSV={downloadCSV}
           />
         </div>
-      </Dialog >
+
+        </div>
+      </div>
 
       {/* Payment dialog  */}
       <Dialog
