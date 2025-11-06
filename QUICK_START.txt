@@ -1,0 +1,195 @@
+╔═══════════════════════════════════════════════════════════════╗
+║             xMati Mother - QUICK START GUIDE                 ║
+╚═══════════════════════════════════════════════════════════════╝
+
+📍 Project Location: /Users/suyogamin/Documents/xmati-mother
+
+═══════════════════════════════════════════════════════════════
+
+🎯 QUICK START (3 Steps)
+
+1️⃣  Navigate to project:
+   cd /Users/suyogamin/Documents/xmati-mother
+
+2️⃣  Ensure Node 23.4.0:
+   nvm use 23.4.0
+
+3️⃣  Start the app:
+   npm start
+
+═══════════════════════════════════════════════════════════════
+
+🔧 FIRST TIME SETUP
+
+Run the automated setup script:
+   ./setup.sh
+
+Or manually:
+   nvm use 23.4.0
+   npm install --legacy-peer-deps
+   npm start
+
+═══════════════════════════════════════════════════════════════
+
+📦 WHAT'S INCLUDED
+
+✅ Subscription Management Screen
+   - Starter & Professional plans
+   - Stripe payment integration
+   - Transaction history
+   - Upgrade/downgrade logic
+   - Refund handling
+
+✅ Registration Wizard Screen
+   - Multi-step form (5 steps)
+   - Email verification (OTP)
+   - Payment card validation
+   - Organization details
+   - Plan selection
+
+✅ Admin Control Panel Screen
+   - User management
+   - Subscription overview
+   - System maintenance
+   - Backup/restore
+   - Enquiry management
+
+═══════════════════════════════════════════════════════════════
+
+🌐 ACCESSING THE SCREENS
+
+After starting the app (npm start):
+
+1. Home Page:        http://localhost:3000
+2. Wizard:           http://localhost:3000/wizard
+3. Subscription:     Click "Subscription Management" button
+4. Admin Panel:      Click "Admin Control Panel" button
+
+═══════════════════════════════════════════════════════════════
+
+🗂️  PROJECT STRUCTURE
+
+src/
+├── components/
+│   ├── Subscription/      (19 files - Main subscription screen)
+│   ├── Wizard/            (5 steps - Registration flow)
+│   └── AdminControl/      (3 files - Admin panel)
+├── utils/
+│   ├── api.ts             (API service)
+│   └── shared.ts          (Toast & auth utilities)
+├── auth/
+│   └── basicAuth.ts       (Authentication)
+└── assets/
+    └── images/            (UI assets)
+
+═══════════════════════════════════════════════════════════════
+
+🔑 ENVIRONMENT VARIABLES
+
+File: .env
+Content:
+  REACT_APP_API_URL=https://www.app.xmati.ai/apis
+  REACT_APP_STRIPE_PROMISE=pk_live_51RPPI0...
+
+═══════════════════════════════════════════════════════════════
+
+⚙️  AVAILABLE COMMANDS
+
+npm start              Start development server (port 3000)
+npm run build          Build for production
+npm test               Run tests
+npm run eject          Eject from CRA (⚠️ one-way operation)
+
+═══════════════════════════════════════════════════════════════
+
+🛠️  TROUBLESHOOTING
+
+Problem: "Module not found" errors
+Solution: nvm use 23.4.0 && npm install --legacy-peer-deps
+
+Problem: Port 3000 already in use
+Solution: PORT=3001 npm start
+
+Problem: Stripe errors
+Solution: Check .env file has correct REACT_APP_STRIPE_PROMISE
+
+Problem: Import errors
+Solution: All imports have been fixed to use relative paths
+
+═══════════════════════════════════════════════════════════════
+
+📋 PRE-FLIGHT CHECKLIST
+
+Before starting, verify:
+□ Node version: v23.4.0 (run: node -v)
+□ npm version: v11.0.0+ (run: npm -v)
+□ Dependencies installed (run: npm install --legacy-peer-deps)
+□ .env file exists with API URL and Stripe key
+□ Port 3000 is available
+
+═══════════════════════════════════════════════════════════════
+
+🎨 TECHNOLOGY STACK
+
+React            19.2.0
+TypeScript       4.4.4
+Node.js          23.4.0
+Blueprint UI     3.x
+Stripe           Latest
+React Router     5.2.0
+Axios            0.21.1
+
+═══════════════════════════════════════════════════════════════
+
+📝 TESTING LOCALLY
+
+To test with sample data, open browser console and run:
+
+localStorage.setItem('formData', JSON.stringify({
+  email: 'test@example.com',
+  fullName: 'Test User',
+  organisationName: 'Test Org'
+}));
+
+localStorage.setItem('subData', JSON.stringify({
+  subscription: 'Starter',
+  amount: '$19',
+  duration: 'monthly',
+  expired: false
+}));
+
+Then refresh the page.
+
+═══════════════════════════════════════════════════════════════
+
+🔐 IMPORTANT NOTES
+
+⚠️  This is a STANDALONE project (isolated from main xMati)
+⚠️  Uses Node 23.4.0 (enforced by .nvmrc)
+⚠️  All functionality copied from original project
+⚠️  Imports have been updated to work standalone
+⚠️  No dependencies on botpress/shared or ~/app/api
+
+═══════════════════════════════════════════════════════════════
+
+✨ READY TO GO!
+
+The project is fully set up and ready to run.
+
+Start command:
+   npm start
+
+Access at:
+   http://localhost:3000
+
+═══════════════════════════════════════════════════════════════
+
+📚 For detailed documentation, see:
+   - SETUP.md        (Complete setup guide)
+   - README.md       (Project overview)
+   - package.json    (Dependencies & scripts)
+
+Created: November 5, 2025
+Status: ✅ Ready for Development
+
+═══════════════════════════════════════════════════════════════

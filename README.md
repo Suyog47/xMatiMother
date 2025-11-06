@@ -1,6 +1,6 @@
-# Getting Started with Create React App
+# xMati Mother
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+xMati Mother is a comprehensive React application that demonstrates multi-step registration, subscription management, and admin control features. This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
 
