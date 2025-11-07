@@ -262,7 +262,7 @@ const UserCard: React.FC<UserCardProps> = ({ email, userData, subscriptionData, 
                 <strong>Industry:</strong><br />
                 {userData.industryType} | {userData.subIndustryType || 'N/A'}
               </div>
-              <div><strong>No. of Bots:</strong><br />{botsData.length ?? '0'}</div>
+              {/* <div><strong>No. of Bots:</strong><br />{botsData.length ?? '0'}</div> */}
               <div><strong>Stripe Customer ID:</strong><br />{userData.stripeCustomerId || 'N/A'}</div>
               <div><strong>Stripe Payment ID:</strong><br />{userData.stripePayementId || 'N/A'}</div>
             </div>
@@ -305,7 +305,7 @@ const UserCard: React.FC<UserCardProps> = ({ email, userData, subscriptionData, 
           />
 
           {/* MIDDLE: Bots List */}
-          <div style={{ flex: 0.8 }}>
+          {/* <div style={{ flex: 0.8 }}>
             <h3 style={{ borderBottom: '1px solid #eee', paddingBottom: '8px', marginBottom: '16px' }}>
               🤖 Bots Owned
             </h3>
@@ -342,11 +342,11 @@ const UserCard: React.FC<UserCardProps> = ({ email, userData, subscriptionData, 
             ) : (
               <p style={{ fontStyle: 'italic', color: '#888' }}>No bots created by this user.</p>
             )}
-          </div>
+          </div> */}
 
-          <Divider
+          {/* <Divider
             style={{ height: 'auto', alignSelf: 'stretch' }}
-          />
+          /> */}
 
           {/* RIGHT: Transaction History */}
           <div style={{ flex: 1.5 }}>

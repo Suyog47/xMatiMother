@@ -31,7 +31,7 @@ const AdminControl: FC = () => {
     try {
       const response = await fetch(`${API_URL}/get-all-users-subscriptions`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json', 'X-App-Version': CURRENT_VERSION},
+        headers: { 'Content-Type': 'application/json', 'X-App-Version': CURRENT_VERSION },
       })
       const result = await response.json()
 
@@ -104,13 +104,14 @@ const AdminControl: FC = () => {
   }
 
   return (
-    <div style={{ 
+    <div style={{
       minHeight: '100vh',
       backgroundColor: '#f5f8fa',
       padding: '20px'
     }}>
       <div style={{
         maxWidth: '1400px',
+        maxHeight: '95vh',
         margin: '0 auto',
         backgroundColor: 'white',
         borderRadius: '12px',
@@ -123,11 +124,11 @@ const AdminControl: FC = () => {
           borderBottom: '1px solid #e1e8ed',
           backgroundColor: '#ffffff'
         }}>
-          <h1 style={{ 
-            margin: 0, 
-            fontSize: '28px', 
-            fontWeight: 600, 
-            color: '#2d3748' 
+          <h1 style={{
+            margin: 0,
+            fontSize: '28px',
+            fontWeight: 600,
+            color: '#2d3748'
           }}>
             Admin Control Panel
           </h1>
@@ -152,30 +153,32 @@ const AdminControl: FC = () => {
           </div>
         )}
 
-        <div style={{ 
-          display: 'flex', 
+        <div style={{
+          display: 'flex',
+          maxHeight: '80vh',
           minHeight: 'calc(100vh - 140px)',
           overflow: 'hidden'
         }}>
-        {/* Left Panel - Admin Actions */}
-        <div
-          style={{
-            width: '30%',
-            padding: '20px',
-            paddingTop: 0,
-            borderRight: '1px solid #eee',
-            background: '#f9f9f9',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '14px',
-            overflowY: 'auto',
-            maxHeight: '100%',
-          }}
-        >
-          <h2 style={{ fontSize: '20px', marginBottom: '6px', fontWeight: 600, marginTop: '10px' }}>Actions</h2>
+          {/* Left Panel - Admin Actions */}
+          <div
+            style={{
+              width: '30%',
+              padding: '20px',
+              paddingTop: 0,
+              borderRight: '1px solid #eee',
+              background: '#f9f9f9',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              gap: '14px',
+              overflowY: 'auto',
+              maxHeight: '100%',
+            }}
+          >
+            <h2 style={{ fontSize: '20px', marginBottom: '6px', fontWeight: 600, marginTop: '10px' }}>Actions</h2>
 
-          {/* Backup */}
-          <Card elevation={Elevation.TWO}
+            {/* Backup */}
+            {/* <Card elevation={Elevation.TWO}
             style={{
               padding: '16px',
               paddingTop: '8px',
@@ -200,10 +203,10 @@ const AdminControl: FC = () => {
             >
               Backup All Bots
             </Button>
-          </Card>
+          </Card> */}
 
-          {/* Retrieve */}
-          <Card elevation={Elevation.TWO}
+            {/* Retrieve */}
+            {/* <Card elevation={Elevation.TWO}
             style={{
               padding: '16px',
               paddingTop: '8px',
@@ -228,122 +231,123 @@ const AdminControl: FC = () => {
             >
               Retrieve Bots
             </Button>
-          </Card>
+          </Card>  */}
 
-          {/* Maintenance */}
-          <Card elevation={Elevation.TWO}
-            style={{
-              padding: '16px',
-              paddingTop: '8px',
-              borderRadius: '8px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center'
-            }}>
-            <h4 style={{ marginBottom: '10px', fontSize: '14px' }}>Toggle Maintenance Mode</h4>
-            <Button
-              fill
-              icon="wrench"
-              intent="warning"
-              onClick={handleMaintenance}
-              disabled={isLoading}
+            {/* Maintenance */}
+            <Card elevation={Elevation.TWO}
               style={{
-                height: '40px',
-                fontSize: '14px',
-                fontWeight: 600,
-                borderRadius: '6px',
-              }}
-            >
-              {isMaintenanceActive ? 'Disable Maintenance' : 'Enable Maintenance'}
-            </Button>
-
-            <div
-              style={{
-                marginTop: '8px',
-                textAlign: 'center',
-                fontWeight: 500,
-                fontSize: '12px',
-                color: isMaintenanceActive ? 'green' : 'red',
-              }}
-            >
-              Status: {isMaintenanceActive ? 'Active' : 'Inactive'}
-            </div>
-          </Card>
-
-          {/* Check Queries */}
-          <Card elevation={Elevation.TWO}
-            style={{
-              padding: '16px',
-              paddingTop: '8px',
-              borderRadius: '8px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center'
-            }}>
-            <h4 style={{ marginBottom: '10px', fontSize: '14px' }}>View User Enquiries</h4>
-            <Button
-              fill
-              icon="chat"
-              intent="primary"
-              onClick={toggleEnquiryDialog}
-              disabled={isLoading}
-              style={{
-                height: '40px',
-                fontSize: '14px',
-                fontWeight: 600,
-                borderRadius: '6px',
-              }}
-            >
-              Check Enquiries
-            </Button>
-          </Card>
-        </div>
-
-
-        {/* Right Panel - User List */}
-        <div
-          style={{
-            flex: 1,
-            padding: '32px',
-            paddingTop: 10,
-            backgroundColor: '#ffffff',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '24px',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 600, marginTop: 0 }}>
-              User Management
-            </h2>
-            <Button
-              icon="refresh"
-              large
-              intent="primary"
-              style={{
-                height: '40px',
-                fontSize: '15px',
-                fontWeight: 600,
+                padding: '16px',
+                paddingTop: '8px',
                 borderRadius: '8px',
-                padding: '0 24px'
-              }}
-              onClick={() => getAllUsers()}
-            />
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center'
+              }}>
+              <h4 style={{ marginBottom: '10px', fontSize: '14px' }}>Toggle Maintenance Mode</h4>
+              <Button
+                fill
+                icon="wrench"
+                intent="warning"
+                onClick={handleMaintenance}
+                disabled={isLoading}
+                style={{
+                  height: '40px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  borderRadius: '6px',
+                }}
+              >
+                {isMaintenanceActive ? 'Disable Maintenance' : 'Enable Maintenance'}
+              </Button>
+
+              <div
+                style={{
+                  marginTop: '8px',
+                  textAlign: 'center',
+                  fontWeight: 500,
+                  fontSize: '12px',
+                  color: isMaintenanceActive ? 'green' : 'red',
+                }}
+              >
+                Status: {isMaintenanceActive ? 'Active' : 'Inactive'}
+              </div>
+            </Card>
+
+            <br />
+            {/* Check Queries */}
+            <Card elevation={Elevation.TWO}
+              style={{
+                padding: '16px',
+                paddingTop: '8px',
+                borderRadius: '8px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center'
+              }}>
+              <h4 style={{ marginBottom: '10px', fontSize: '14px' }}>View User Enquiries</h4>
+              <Button
+                fill
+                icon="chat"
+                intent="primary"
+                onClick={toggleEnquiryDialog}
+                disabled={isLoading}
+                style={{
+                  height: '40px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  borderRadius: '6px',
+                }}
+              >
+                Check Enquiries
+              </Button>
+            </Card>
           </div>
 
-          {/* Scrollable User List */}
-          <div style={{ overflowY: 'auto', flex: 1 }}>
-            {userList.map((u, idx) => (
-              <UserCard
-                key={idx}
-                email={u.email}
-                userData={u.userData}
-                subscriptionData={u.subscriptionData}
-                botsData={u.botsData}
+
+          {/* Right Panel - User List */}
+          <div
+            style={{
+              flex: 1,
+              padding: '32px',
+              paddingTop: 10,
+              backgroundColor: '#ffffff',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '24px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <h2 style={{ fontSize: '24px', fontWeight: 600, marginTop: 0 }}>
+                User Management
+              </h2>
+              <Button
+                icon="refresh"
+                large
+                intent="primary"
+                style={{
+                  height: '40px',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  borderRadius: '8px',
+                  padding: '0 24px'
+                }}
+                onClick={() => getAllUsers()}
               />
-            ))}
+            </div>
+
+            {/* Scrollable User List */}
+            <div style={{ overflowY: 'auto', flex: 1 }}>
+              {userList.map((u, idx) => (
+                <UserCard
+                  key={idx}
+                  email={u.email}
+                  userData={u.userData}
+                  subscriptionData={u.subscriptionData}
+                  botsData={u.botsData}
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
         </div>
 
