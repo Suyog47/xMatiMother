@@ -470,9 +470,8 @@ const Subscription: FC = () => {
     await new Promise(resolve => setTimeout(resolve, 500))
   }
 
-  const logout = async () => {
+  const clearing = async () => {
     localStorage.clear()
-    window.location.href = '/'
   }
 
   function formatToISODate(date: any) {
@@ -909,7 +908,7 @@ const Subscription: FC = () => {
       <PaymentSuccessDialog
         isOpen={isSuccessDialogOpen}
         onClose={() => setIsSuccessDialogOpen(false)}
-        onLogout={logout}
+        onClearing={clearing}
       />
 
       {/* Subscription cancel confirm dialog */}
@@ -926,7 +925,7 @@ const Subscription: FC = () => {
       <SubscriptionCancelledDialog
         isOpen={isCancelDialogOpen}
         onClose={() => setIsCancelDialogOpen(false)}
-        onLogout={logout}
+        onClearing={clearing}
       />
 
       {/* Payment Failed dialog */}

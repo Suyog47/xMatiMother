@@ -4,16 +4,16 @@ import { Dialog, Button } from '@blueprintjs/core'
 interface SubscriptionCancelledDialogProps {
   isOpen: boolean
   onClose: () => void
-  onLogout: () => Promise<void>
+  onClearing: () => Promise<void>
 }
 
-const SubscriptionCancelledDialog: React.FC<SubscriptionCancelledDialogProps> = ({ isOpen, onClose, onLogout }) => {
+const SubscriptionCancelledDialog: React.FC<SubscriptionCancelledDialogProps> = ({ isOpen, onClose, onClearing }) => {
   return (
     <Dialog
       isOpen={isOpen}
       onClose={async () => {
         onClose()
-        await onLogout()
+        await onClearing()
       }}
       title="Subscription Cancelled"
       icon="tick-circle"
@@ -31,7 +31,7 @@ const SubscriptionCancelledDialog: React.FC<SubscriptionCancelledDialogProps> = 
         <div style={{ marginTop: 24, color: 'red', fontWeight: 600, fontSize: 17 }}>
           *DO NOT Refresh this page and logout is mandatory for full subscription activation*.
         </div>
-        <Button
+        {/* <Button
           intent="primary"
           onClick={async () => {
             onClose()
@@ -47,7 +47,7 @@ const SubscriptionCancelledDialog: React.FC<SubscriptionCancelledDialogProps> = 
           }}
         >
           Logout
-        </Button>
+        </Button> */}
       </div>
     </Dialog>
   )

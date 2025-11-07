@@ -4,16 +4,16 @@ import { Dialog, Button } from '@blueprintjs/core'
 interface PaymentSuccessDialogProps {
   isOpen: boolean
   onClose: () => void
-  onLogout: () => Promise<void>
+  onClearing: () => Promise<void>
 }
 
-const PaymentSuccessDialog: React.FC<PaymentSuccessDialogProps> = ({ isOpen, onClose, onLogout }) => {
+const PaymentSuccessDialog: React.FC<PaymentSuccessDialogProps> = ({ isOpen, onClose, onClearing }) => {
   return (
     <Dialog
       isOpen={isOpen}
       onClose={async () => {
         onClose()
-        await onLogout()
+        await onClearing()
       }}
       title="Payment Successful"
       icon="tick-circle"
@@ -25,12 +25,12 @@ const PaymentSuccessDialog: React.FC<PaymentSuccessDialogProps> = ({ isOpen, onC
           Your payment is successful...
         </p>
         <div style={{ marginTop: 10, color: '#106ba3', fontWeight: 500, fontSize: 15 }}>
-          You now need to log out and will need to log in again.<br />
+          Go back to your xMati and <strong>refresh the page</strong> to reflect the changes.<br />
         </div>
-        <div style={{ marginTop: 24, color: 'red', fontWeight: 600, fontSize: 17 }}>
+        {/* <div style={{ marginTop: 24, color: 'red', fontWeight: 600, fontSize: 17 }}>
           *DO NOT Refresh this page and logout is mandatory for full subscription activation*.
-        </div>
-        <Button
+        </div> */}
+        {/* <Button
           intent="primary"
           onClick={async () => {
             onClose()
@@ -46,7 +46,7 @@ const PaymentSuccessDialog: React.FC<PaymentSuccessDialogProps> = ({ isOpen, onC
           }}
         >
           Logout
-        </Button>
+        </Button> */}
       </div>
     </Dialog>
   )
