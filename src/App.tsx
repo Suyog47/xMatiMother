@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Switch, Link, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Route, Switch, Link, useLocation, useHistory } from 'react-router-dom';
 import '@blueprintjs/core/lib/css/blueprint.css';
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 import '@blueprintjs/datetime/lib/css/blueprint-datetime.css';
@@ -13,17 +13,61 @@ import { hasRequiredAuthParams } from './utils/auth';
 // Protected Route Component for Admin
 const ProtectedAdminRoute: React.FC = () => {
   const location = useLocation();
+  const history = useHistory();
+  
+  // Check authorization whenever location changes
+  useEffect(() => {
+    const isAuthorized = hasRequiredAuthParams(location);
+    if (!isAuthorized) {
+      history.replace('/unauthorized');
+      return;
+    }
+    
+    // Additional admin email check
+    const formData = JSON.parse(localStorage.getItem('formData') || '{}');
+    const isAdmin = formData.email === 'xmatiservice@gmail.com';
+    if (!isAdmin) {
+      history.replace('/unauthorized');
+    }
+  }, [location, history]);
+  
   const isAuthorized = hasRequiredAuthParams(location);
   
-  return isAuthorized ? <AdminControl /> : <Unauthorized />;
+  if (!isAuthorized) {
+    return null; // Don't render anything while redirecting
+  }
+  
+  // Additional admin email check for render
+  const formData = JSON.parse(localStorage.getItem('formData') || '{}');
+  const isAdmin = formData.email === 'xmatiservice@gmail.com';
+  
+  if (!isAdmin) {
+    return null; // Don't render anything while redirecting
+  }
+  
+  return <AdminControl />;
 };
 
 // Protected Route Component for Subscription
 const ProtectedSubscriptionRoute: React.FC = () => {
   const location = useLocation();
+  const history = useHistory();
+  
+  // Check authorization whenever location changes
+  useEffect(() => {
+    const isAuthorized = hasRequiredAuthParams(location);
+    if (!isAuthorized) {
+      history.replace('/unauthorized');
+    }
+  }, [location, history]);
+  
   const isAuthorized = hasRequiredAuthParams(location);
   
-  return isAuthorized ? <Subscription /> : <Unauthorized />;
+  if (!isAuthorized) {
+    return null; // Don't render anything while redirecting
+  }
+  
+  return <Subscription />;
 };
 
 function App() {
@@ -53,6 +97,9 @@ function App() {
             </Route>
             <Route path="/subscription">
               <ProtectedSubscriptionRoute />
+            </Route>
+            <Route path="/unauthorized">
+              <Unauthorized />
             </Route>
           </Switch>
         </main>
