@@ -23,7 +23,7 @@ const Subscription: FC = () => {
   const savedSubData = JSON.parse(localStorage.getItem('subData') || '{}')
   const token = JSON.parse(localStorage.getItem('token') || '{}')
 
-  console.log(savedFormData, savedSubData)
+  // console.log(savedFormData, savedSubData)
   // Dummy toggle function for compatibility with existing dialogs
   const toggle = () => {}
 
@@ -43,24 +43,24 @@ const Subscription: FC = () => {
   const [selectedDuration, setSelectedDuration] = useState<string>('monthly')
   const [isInvoiceLicenseDialogOpen, setIsInvoiceLicenseDialogOpen] = useState(false)
 
-  interface CalculatedData {
-    status: boolean
-    refund: boolean
-    action: 'upgrade' | 'downgrade'
-    totalMonths?: number
-    usedMonth?: number
-    usedAmount: number
-    daysUsed?: number
-    daysRemaining?: number
-    dailyAmount?: string
-    amountUsedInDays?: number
-    totalUsedAmount?: number
-    totalLeftAmount: string
-    timestamp: Date
-    amount: number
-    message?: string
-    error?: string
-  }
+  // interface CalculatedData {
+  //   status: boolean
+  //   refund: boolean
+  //   action: 'upgrade' | 'downgrade'
+  //   totalMonths?: number
+  //   usedMonth?: number
+  //   usedAmount: number
+  //   daysUsed?: number
+  //   daysRemaining?: number
+  //   dailyAmount?: string
+  //   amountUsedInDays?: number
+  //   totalUsedAmount?: number
+  //   totalLeftAmount: string
+  //   timestamp: Date
+  //   amount: number
+  //   message?: string
+  //   error?: string
+  // }
 
   const [calculatedData, setCalculatedData] = useState<any>(null)
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true)
@@ -584,6 +584,7 @@ const Subscription: FC = () => {
       }}>
         <div style={{
           maxWidth: '1400px',
+          maxHeight: '96vh',
           margin: '0 auto',
           backgroundColor: 'white',
           borderRadius: '12px',
@@ -592,7 +593,7 @@ const Subscription: FC = () => {
         }}>
           {/* Header */}
           <div style={{
-            padding: '24px 32px',
+            padding: '20px 32px',
             borderBottom: '1px solid #e1e8ed',
             backgroundColor: '#ffffff',
             display: 'flex',
@@ -820,7 +821,7 @@ const Subscription: FC = () => {
               minWidth: '2px',
               background: '#e0e0e0',
               margin: '0 16px',
-              height: '100%',
+              alignSelf: 'stretch',
               flexShrink: 0,
             }}
           />

@@ -36,10 +36,12 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
           borderRadius: 8,
           padding: 20,
           minWidth: 300,
-          height: 570, // Fixed height
+          height: '100%',
+          maxHeight: '80vh',
           display: 'flex',
           flexDirection: 'column',
           boxShadow: '0 0 8px #e0e0e0',
+          overflow: 'hidden',
         }}
       >
         {/* Header with title + reload button */}
@@ -103,7 +105,12 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
         </div>
 
         {/* Scrollable Content */}
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+        <div style={{ 
+          flex: 1, 
+          overflowY: 'auto',
+          minHeight: 0,
+          paddingRight: '4px'
+        }}>
           {isLoadingTransactions ? (
             <div
               style={{

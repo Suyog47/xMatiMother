@@ -52,35 +52,35 @@ const AdminControl: FC = () => {
   }, [getAllUsers])
 
 
-  const handleBackup = async () => {
-    setLoading(true)
-    try {
-      const ids = savedFormData.botIdList
-      await api.getSecured({ timeout: ms('8m') }).post('/admin/workspace/bots/saveAllBots', { ids })
-      alert('Backup to S3 completed successfully!')
-    } catch (error) {
-      console.error('Error during backup:', error)
-      alert('Failed to backup to S3.')
-    } finally {
-      setLoading(false)
-    }
-  }
+  // const handleBackup = async () => {
+  //   setLoading(true)
+  //   try {
+  //     const ids = savedFormData.botIdList
+  //     await api.getSecured({ timeout: ms('8m') }).post('/admin/workspace/bots/saveAllBots', { ids })
+  //     alert('Backup to S3 completed successfully!')
+  //   } catch (error) {
+  //     console.error('Error during backup:', error)
+  //     alert('Failed to backup to S3.')
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
-  const handleRetrieval = async () => {
-    setLoading(true)
-    try {
-      await api.getSecured({ timeout: ms('8m') }).post('/admin/workspace/bots/getAllBots')
-      alert('Retrieval from S3 completed successfully!')
-      setTimeout(() => {
-        window.location.reload()
-      }, 500)
-    } catch (error) {
-      console.error('Error during retrieval:', error)
-      alert('Failed to retrieve from S3.')
-    } finally {
-      setLoading(false)
-    }
-  }
+  // const handleRetrieval = async () => {
+  //   setLoading(true)
+  //   try {
+  //     await api.getSecured({ timeout: ms('8m') }).post('/admin/workspace/bots/getAllBots')
+  //     alert('Retrieval from S3 completed successfully!')
+  //     setTimeout(() => {
+  //       window.location.reload()
+  //     }, 500)
+  //   } catch (error) {
+  //     console.error('Error during retrieval:', error)
+  //     alert('Failed to retrieve from S3.')
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
   const handleMaintenance = async () => {
     setLoading(true)
