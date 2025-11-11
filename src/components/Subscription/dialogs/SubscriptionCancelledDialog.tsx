@@ -25,17 +25,16 @@ const SubscriptionCancelledDialog: React.FC<SubscriptionCancelledDialogProps> = 
           Your subscription has been cancelled and automatic renewal is now disabled.
         </p>
         <div style={{ marginTop: 10, color: '#106ba3', fontWeight: 500, fontSize: 15 }}>
-          You now need to log out and log in again.
-          <br />
+          Go back to your xMati and <strong>logout your xMati app</strong> to reflect the changes.
         </div>
-        <div style={{ marginTop: 24, color: 'red', fontWeight: 600, fontSize: 17 }}>
+        {/* <div style={{ marginTop: 24, color: 'red', fontWeight: 600, fontSize: 17 }}>
           *DO NOT Refresh this page and logout is mandatory for full subscription activation*.
-        </div>
-        {/* <Button
+        </div> */}
+        <Button
           intent="primary"
           onClick={async () => {
             onClose()
-            await onLogout()
+            await onClearing()
           }}
           style={{
             marginTop: '20px',
@@ -46,8 +45,8 @@ const SubscriptionCancelledDialog: React.FC<SubscriptionCancelledDialogProps> = 
             borderRadius: 6
           }}
         >
-          Logout
-        </Button> */}
+          Continue
+        </Button>
       </div>
     </Dialog>
   )

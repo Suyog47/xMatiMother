@@ -25,16 +25,16 @@ const PaymentSuccessDialog: React.FC<PaymentSuccessDialogProps> = ({ isOpen, onC
           Your payment is successful...
         </p>
         <div style={{ marginTop: 10, color: '#106ba3', fontWeight: 500, fontSize: 15 }}>
-          Go back to your xMati and <strong>refresh the page</strong> to reflect the changes.<br />
+          Go back to your xMati and <strong>logout your xMati app</strong> to reflect the changes.
         </div>
         {/* <div style={{ marginTop: 24, color: 'red', fontWeight: 600, fontSize: 17 }}>
           *DO NOT Refresh this page and logout is mandatory for full subscription activation*.
         </div> */}
-        {/* <Button
+        <Button
           intent="primary"
           onClick={async () => {
             onClose()
-            await onLogout()
+            await onClearing()
           }}
           style={{
             marginTop: '20px',
@@ -45,8 +45,8 @@ const PaymentSuccessDialog: React.FC<PaymentSuccessDialogProps> = ({ isOpen, onC
             borderRadius: 6,
           }}
         >
-          Logout
-        </Button> */}
+          Continue
+        </Button>
       </div>
     </Dialog>
   )

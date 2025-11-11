@@ -309,7 +309,7 @@ const Subscription: FC = () => {
             'Authorization': `Bearer ${token}`,
             'X-App-Version': CURRENT_VERSION
           },
-          body: JSON.stringify({ chargeId: savedSubData.transactionId, reason: '', email, fullName, subscription, amount, refundDetails }),
+          body: JSON.stringify({ chargeId: savedSubData.transactionId, reason: 'by user', email, fullName, subscription, amount, refundDetails }),
         })
       } else {
         res = await fetch(`${API_URL}/trial-cancellation`, {
@@ -472,6 +472,9 @@ const Subscription: FC = () => {
 
   const clearing = async () => {
     localStorage.clear()
+    // Try to close the current tab (works if window was opened by script; fallback using _self)
+    window.open('', '_self')
+    window.close()
   }
 
   function formatToISODate(date: any) {
