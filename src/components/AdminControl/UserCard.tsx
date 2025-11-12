@@ -18,6 +18,7 @@ interface UserData {
   stripeCustomerId: string
   stripePayementId: string
   botIdList: { id: string; owner: string }[]
+  blocked?: boolean
 }
 
 interface SubscriptionData {
@@ -47,13 +48,59 @@ const API_URL = process.env.REACT_APP_API_URL || 'https://www.app.xmati.ai/apis'
 
 const UserCard: React.FC<UserCardProps> = ({ email, userData, subscriptionData, botsData }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const savedFormData = JSON.parse(localStorage.getItem('formData') || '{}')
+  // const savedFormData = JSON.parse(localStorage.getItem('formData') || '{}')
   const savedSubData = JSON.parse(localStorage.getItem('subData') || '{}')
   const token = JSON.parse(localStorage.getItem('token') || '{}')
 
   // Dummy transaction state and functions for UI demo
   const [transactions, setTransactions] = useState<any[]>([])
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(false)
+  const [isBlockActionLoading, setIsBlockActionLoading] = useState(false)
+
+  // Check if user is blocked
+  const isUserBlocked = userData.blocked === true
+
+  const handleBlockUnblock = async (e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent opening the dialog
+    
+    const action = isUserBlocked ? 'unblock' : 'block'
+    const confirmed = await confirmDialog(
+      `Are you sure you want to ${action} ${userData.fullName}?`,
+      { acceptLabel: action.charAt(0).toUpperCase() + action.slice(1) }
+    )
+    
+    if (!confirmed) return
+
+    setIsBlockActionLoading(true)
+    try {
+       console.log(isUserBlocked)
+      const response = await fetch(`${API_URL}/set-block-status`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'X-App-Version': CURRENT_VERSION
+        },
+        body: JSON.stringify({ email: userData.email, status: !isUserBlocked}),
+      })
+
+      const result = await response.json()
+      
+      if (result.success) {
+        toast.success(`User ${action}ed successfully`)
+        setTimeout(() => {
+          window.location.reload()
+        }, 500)
+      } else {
+        toast.failure(`Failed to ${action} user: ${result.message}`)
+      }
+    } catch (error) {
+      console.error(`Error ${action}ing user:`, error)
+      toast.failure(`Failed to ${action} user`)
+    } finally {
+      setIsBlockActionLoading(false)
+    }
+  }
 
   const fetchTransactions = async (email: any) => {
     setIsLoadingTransactions(true)
@@ -224,20 +271,55 @@ const UserCard: React.FC<UserCardProps> = ({ email, userData, subscriptionData, 
           <Icon icon="envelope" style={{ marginRight: '6px' }} />
           {email}
         </div>
-        <div
-          style={{
-            marginTop: '6px',
-            padding: '6px 12px',
-            width: 'fit-content',
-            backgroundColor: '#E1F5FE',
-            borderRadius: '6px',
-            fontWeight: 500,
-            fontSize: '13px',
-            color: '#106BA3',
-          }}
-        >
-          <Icon icon="star" style={{ marginRight: '6px' }} />
-          {subscriptionData.subscription} Plan
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
+          <div
+            style={{
+              padding: '6px 12px',
+              backgroundColor: '#E1F5FE',
+              borderRadius: '6px',
+              fontWeight: 500,
+              fontSize: '13px',
+              color: '#106BA3',
+            }}
+          >
+            <Icon icon="star" style={{ marginRight: '6px' }} />
+            {subscriptionData.subscription} Plan
+          </div>
+          
+          <Button
+            intent={isUserBlocked ? "success" : "danger"}
+            small
+            loading={isBlockActionLoading}
+            onClick={handleBlockUnblock}
+            style={{
+              minWidth: '85px',
+              height: '32px',
+              fontSize: '11px',
+              fontWeight: 600,
+              borderRadius: '16px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              background: isUserBlocked 
+                ? 'linear-gradient(135deg, #0f9960 0%, #0d8050 100%)' 
+                : 'linear-gradient(135deg, #db3737 0%, #c23030 100%)',
+              border: 'none',
+              color: 'white',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              transition: 'all 0.2s ease',
+              transform: 'scale(1)',
+            }}
+            icon={isUserBlocked ? "unlock" : "lock"}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)'
+              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)'
+              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)'
+            }}
+          >
+            {isUserBlocked ? "Unblock" : "Block"}
+          </Button>
         </div>
       </Card>
 
