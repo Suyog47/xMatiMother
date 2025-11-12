@@ -239,20 +239,20 @@ const CustomerWizardForm: React.FC = () => {
   }
 
   const handleOTPVerification = async () => {
-    setIsVerifyingOtp(true)
-    setOtpVerified(true)
-    setOtpResentMessage('')
-    setIsVerifyingOtp(false)
     // setIsVerifyingOtp(true)
-    // if (enteredOTP.trim() === generatedOTP) {
-    //   setOtpVerified(true)
-    //   setOtpResentMessage('')
-    //   setErrors((prevErrors) => ({ ...prevErrors, otp: '' }))
-    // } else {
-    //   setOtpVerified(false)
-    //   setErrors((prevErrors) => ({ ...prevErrors, otp: 'Invalid OTP. Please try again' }))
-    // }
+    // setOtpVerified(true)
+    // setOtpResentMessage('')
     // setIsVerifyingOtp(false)
+    setIsVerifyingOtp(true)
+    if (enteredOTP.trim() === generatedOTP) {
+      setOtpVerified(true)
+      setOtpResentMessage('')
+      setErrors((prevErrors) => ({ ...prevErrors, otp: '' }))
+    } else {
+      setOtpVerified(false)
+      setErrors((prevErrors) => ({ ...prevErrors, otp: 'Invalid OTP. Please try again' }))
+    }
+    setIsVerifyingOtp(false)
   }
 
   const validateStep = async (): Promise<boolean> => {
@@ -290,11 +290,11 @@ const CustomerWizardForm: React.FC = () => {
       }
 
       // Call checkUser only if no other errors exist
-      // if (Object.keys(newErrors).length === 0) {
-      //   if (await checkUser()) {
-      //     newErrors.email = 'This email already exists, please try another one'
-      //   }
-      // }
+      if (Object.keys(newErrors).length === 0) {
+        if (await checkUser()) {
+          newErrors.email = 'This email already exists, please try another one'
+        }
+      }
     } else if (step === 2) {
       if (!enteredOTP.trim()) {
         newErrors.otp = 'OTP is required'
