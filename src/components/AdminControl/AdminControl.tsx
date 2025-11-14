@@ -18,7 +18,8 @@ const API_URL = process.env.REACT_APP_API_URL || 'https://www.app.xmati.ai/apis'
 
 const AdminControl: FC = () => {
   const savedFormData = JSON.parse(localStorage.getItem('formData') || '{}')
-  const maintenanceStatus = JSON.parse(localStorage.getItem('maintenance') || '{}')
+  const token = JSON.parse(localStorage.getItem('token') || '{}')
+  const maintenanceStatus = JSON.parse(localStorage.getItem('maintenance') || '{"status": false}')
   const [isLoading, setLoading] = useState(false)
   const [isMaintenanceActive, setMaintenanceActive] = useState(maintenanceStatus.status)
   const [userList, setUserList] = useState<UserData[]>([])
@@ -87,13 +88,14 @@ const AdminControl: FC = () => {
     try {
       const response = await fetch(`${API_URL}/set-maintenance`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-App-Version': CURRENT_VERSION },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'X-App-Version': CURRENT_VERSION },
         body: JSON.stringify({ status: !isMaintenanceActive }),
       })
+
       const result = await response.json()
       if (result.status) {
         toggleMaintenance()
-        alert(`${result.msg}, ${!result.data ? 'active' : 'inactive'}`)
+        alert(`${result.msg}, ${!isMaintenanceActive ? 'active' : 'inactive'}`)
         localStorage.setItem('maintenance', JSON.stringify({ status: !isMaintenanceActive }))
       } else {
         alert(`Failed to toggle maintenance mode: ${result.msg}`)
