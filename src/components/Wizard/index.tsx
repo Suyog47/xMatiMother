@@ -151,6 +151,7 @@ const CustomerWizardForm: React.FC = () => {
   const stripe = useStripe()
   const elements = useElements()
 
+
   const countryOptions = [
     { code: '+1', name: 'United States' },
     { code: '+91', name: 'India' },
@@ -174,12 +175,14 @@ const CustomerWizardForm: React.FC = () => {
     { code: '+966', name: 'Saudi Arabia' }
   ]
 
+
   useEffect(() => {
     setFormData((prevData) => ({
       ...prevData,
       subIndustryType: '',
     }))
   }, [formData.industryType])
+
 
   // useEffect to handle countdown
   useEffect(() => {
@@ -386,7 +389,7 @@ const CustomerWizardForm: React.FC = () => {
         }
 
         // Step 3: Complete setup
-        await setLocalData()
+        //await setLocalData()
         
         // Show success dialog
         setIsRegistrationSuccessOpen(true)
@@ -424,16 +427,6 @@ const CustomerWizardForm: React.FC = () => {
         setErrorMessage(s3Stat.msg)
         return false
       }
-
-      // // make an api call for internal login
-      // const { data } = await api.getAnonymous({ toastErrors: false }).post('/admin/auth/login/basic/default', {
-      //   email: 'admin@gmail.com',
-      //   password: 'Admin@123'
-      // })
-
-      // //set auth token after login
-      // auth.setToken(data.payload)
-
       // set stripe customer
       void setStripeCustomer()
       return true
@@ -613,10 +606,19 @@ const CustomerWizardForm: React.FC = () => {
         void sendOtp()
         return false // Email available to register
       } else {
-        return false // Something went wrong
+        // Parse response body to extract a message if available, otherwise use a generic message
+        let msg = 'Something went wrong while checking the user'
+        try {
+          const data = await result.json()
+          msg = data?.msg || data?.message || msg
+        } catch (e) {
+          // ignore parse errors and keep generic message
+        }
+        alert(msg)
+        return true // Something went wrong
       }
     } catch (error) {
-      return false
+      return true
     } finally {
       setIsLoading(false) // Hide big loader
     }
@@ -650,69 +652,69 @@ const CustomerWizardForm: React.FC = () => {
     }
   }
 
-  const setLocalData = async () => {
+  // const setLocalData = async () => {
 
-    const updatedFormData = {
-      fullName: formData.fullName,
-      email: formData.email,
-      phoneNumber: formData.phoneNumber, // Save full number
-      countryCode: formData.countryCode, // Save separately as well if needed
-      password: formData.password,
-      organisationName: formData.organisationName,
-      industryType: formData.industryType,
-      subIndustryType: formData.subIndustryType,
-      stripeCustomerId: customerId,
-      stripePayementId: paymentMethodId,
-      ...(selectedPlan !== 'Starter' && {
-        nextSubs: {
-          plan: selectedPlan,
-          duration: selectedDuration,
-          price,
-          suggested: false,
-          isDowngrade: false // Default to false
-        }
-      })
-    }
+  //   const updatedFormData = {
+  //     fullName: formData.fullName,
+  //     email: formData.email,
+  //     phoneNumber: formData.phoneNumber, // Save full number
+  //     countryCode: formData.countryCode, // Save separately as well if needed
+  //     password: formData.password,
+  //     organisationName: formData.organisationName,
+  //     industryType: formData.industryType,
+  //     subIndustryType: formData.subIndustryType,
+  //     stripeCustomerId: customerId,
+  //     stripePayementId: paymentMethodId,
+  //     ...(selectedPlan !== 'Starter' && {
+  //       nextSubs: {
+  //         plan: selectedPlan,
+  //         duration: selectedDuration,
+  //         price,
+  //         suggested: false,
+  //         isDowngrade: false // Default to false
+  //       }
+  //     })
+  //   }
 
-    const currentUTC = new Date().toISOString().split('T')[0] // Always UTC
-    const currentDate = new Date(currentUTC)
+  //   const currentUTC = new Date().toISOString().split('T')[0] // Always UTC
+  //   const currentDate = new Date(currentUTC)
 
-    const tillDateUTC = new Date()
+  //   const tillDateUTC = new Date()
 
-    if (selectedPlan === 'Starter') {
-      if (selectedDuration === 'monthly') {
-        tillDateUTC.setMonth(currentDate.getMonth() + 1)
-      } else {
-        tillDateUTC.setFullYear(currentDate.getFullYear() + 1)
-      }
-    } else {
-      tillDateUTC.setDate(currentDate.getDate() + 5)
-    }
+  //   if (selectedPlan === 'Starter') {
+  //     if (selectedDuration === 'monthly') {
+  //       tillDateUTC.setMonth(currentDate.getMonth() + 1)
+  //     } else {
+  //       tillDateUTC.setFullYear(currentDate.getFullYear() + 1)
+  //     }
+  //   } else {
+  //     tillDateUTC.setDate(currentDate.getDate() + 5)
+  //   }
 
-    const tillDate = new Date(tillDateUTC.toISOString().split('T')[0]) // Ensure it's in the same format
+  //   const tillDate = new Date(tillDateUTC.toISOString().split('T')[0]) // Ensure it's in the same format
 
-    // Check the days remaining
-    const timeDifference = tillDate.getTime() - currentDate.getTime()
-    const daysRemaining = Math.ceil(timeDifference / (1000 * 60 * 60 * 24))
+  //   // Check the days remaining
+  //   const timeDifference = tillDate.getTime() - currentDate.getTime()
+  //   const daysRemaining = Math.ceil(timeDifference / (1000 * 60 * 60 * 24))
 
-    const updatedSubData = {
-      subscription: (selectedPlan === 'Starter') ? 'Starter' : 'Trial',
-      createdAt: currentDate,
-      till: tillDate,
-      expired: false,
-      daysRemaining,
-      promptRun: false,  // set the prompt run to false
-      amount: (selectedPlan === 'Starter') ? price : 0,
-      duration: (selectedPlan === 'Starter') ? selectedDuration : '5d',
-      canCancel: true,
-      subsChanged: false,
-      isCancelled: false, // Default to false
-    }
+  //   const updatedSubData = {
+  //     subscription: (selectedPlan === 'Starter') ? 'Starter' : 'Trial',
+  //     createdAt: currentDate,
+  //     till: tillDate,
+  //     expired: false,
+  //     daysRemaining,
+  //     promptRun: false,  // set the prompt run to false
+  //     amount: (selectedPlan === 'Starter') ? price : 0,
+  //     duration: (selectedPlan === 'Starter') ? selectedDuration : '5d',
+  //     canCancel: true,
+  //     subsChanged: false,
+  //     isCancelled: false, // Default to false
+  //   }
 
-    localStorage.setItem('formData', JSON.stringify(updatedFormData))
-    localStorage.setItem('subData', JSON.stringify(updatedSubData))
-    localStorage.setItem('token', JSON.stringify(formData.token))
-  }
+  //   localStorage.setItem('formData', JSON.stringify(updatedFormData))
+  //   localStorage.setItem('subData', JSON.stringify(updatedSubData))
+  //   localStorage.setItem('token', JSON.stringify(formData.token))
+  // }
 
   const verifyCard = async () => {
     setIsValidatingCard(true) // Show small loader

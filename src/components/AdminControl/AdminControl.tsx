@@ -340,6 +340,7 @@ const AdminControl: FC = () => {
             {/* Scrollable User List */}
             <div style={{ overflowY: 'auto', flex: 1 }}>
               {userList.map((u, idx) => (
+                u.email === 'xmatiservice@gmail.com' ? null : (
                 <UserCard
                   key={idx}
                   email={u.email}
@@ -347,7 +348,7 @@ const AdminControl: FC = () => {
                   subscriptionData={u.subscriptionData}
                   botsData={u.botsData}
                 />
-              ))}
+              )))}
             </div>
           </div>
 
