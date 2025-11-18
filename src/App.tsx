@@ -14,6 +14,8 @@ import logo from './assets/images/xmati.png';
 const packageJson = { version: '100.0.0' }
 const CURRENT_VERSION = packageJson.version
 
+const API_URL = process.env.REACT_APP_API_URL || 'https://www.app.xmati.ai/apis'
+
 // LocalStorage Invalid Dialog Component
 const LocalStorageInvalidDialog: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
   return (
@@ -138,6 +140,48 @@ const AccountBlockedScreen: React.FC = () => {
   );
 };
 
+// Maintenance Mode Full Screen Component
+const MaintenanceModeScreen: React.FC = () => {
+  return (
+    <div
+      style={{
+        height: '100vh',
+        width: '100vw',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)',
+        textAlign: 'center',
+        padding: 24,
+        boxSizing: 'border-box',
+      }}
+    >
+      <img
+        src={logo}
+        alt='xMati Logo'
+        style={{ width: 120, height: 'auto', marginBottom: 24, userSelect: 'none' }}
+        draggable={false}
+      />
+      <div
+        style={{
+          fontSize: 23,
+          fontWeight: 600,
+          color: '#102a43',
+          width: '80%',
+          maxWidth: 500,
+          lineHeight: 1.6,
+          wordSpacing: '2px',
+        }}
+      >
+        The xMati platform is currently in Maintenance mode.
+        <br />
+        Please check back later.
+      </div>
+    </div>
+  );
+};
+
 // Protected Route Component for Admin
 const ProtectedAdminRoute: React.FC = () => {
   const location = useLocation();
@@ -203,7 +247,14 @@ function App() {
   const [showAccountBlockedScreen, setShowAccountBlockedScreen] = useState(() => {
      // Check localStorage on initial load for blocked status
     const savedBlockedState = localStorage.getItem('accountBlocked')
+    //return false;
     return savedBlockedState ? JSON.parse(savedBlockedState).isBlocked : false
+  });
+  const [showMaintenanceModeScreen, setShowMaintenanceModeScreen] = useState(() => {
+    // Check localStorage on initial load for maintenance status
+    const savedMaintenanceState = localStorage.getItem('maintenanceMode')
+    // return false;
+    return savedMaintenanceState ? JSON.parse(savedMaintenanceState).isActive : false
   });
 
   // Handle block status from WebSocket
@@ -212,6 +263,12 @@ function App() {
     localStorage.setItem('accountBlocked', JSON.stringify({
       isBlocked: status === 'Blocked' ? true : false,
     }))
+  };
+
+  // Handle maintenance status from WebSocket
+  const handleMaintenanceStatus = (status: boolean) => {
+    setShowMaintenanceModeScreen(status);
+    localStorage.setItem('maintenanceMode', JSON.stringify({ isActive: status }))
   };
 
   // Check localStorage fields continuously using listeners
@@ -304,28 +361,29 @@ function App() {
         // Immediately call /check-account-status after successful WebSocket connection
         // if (!didCheckAccountRef.current) {
         //   didCheckAccountRef.current = true
-        //   void (async () => {
-        //     try {
-        //       if (!formData.email) {
-        //         return
-        //       }
-        //       const res = await fetch(`${API_URL}/check-account-status`, {
-        //         method: 'POST',
-        //         headers: {
-        //           'Content-Type': 'application/json',
-        //           'X-App-Version': CURRENT_VERSION,
-        //         },
-        //         body: JSON.stringify({
-        //           email: formData.email,
-        //           request: 'status',
-        //         }),
-        //       })
-
-        //     } catch (err) {
-        //       // Silently ignore errors; WebSocket remains available
-        //     }
-        //   })()
+         
         // }
+         void (async () => {
+            try {
+              if (!formData.email) {
+                return
+              }
+              const res = await fetch(`${API_URL}/check-account-status`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-App-Version': CURRENT_VERSION,
+                },
+                body: JSON.stringify({
+                  email: `${formData.email}_util`,
+                  isMother: true,
+                }),
+              })
+
+            } catch (err) {
+              // Silently ignore errors; WebSocket remains available
+            }
+          })()
       }
 
       socket.onmessage = (event) => {
@@ -339,6 +397,10 @@ function App() {
           case 'BLOCK_STATUS':
             handleBlockStatus(data.message)
             // console.log('user blocked')
+            break
+          case 'MAINTENANCE_STATUS':
+            handleMaintenanceStatus(data.message)
+            // console.log('maintenance mode')
             break
           default:
             break
@@ -367,8 +429,11 @@ function App() {
   return (
     <Router>
       <div className="App">
-        {/* Show full screen if account is blocked */}
-        {showAccountBlockedScreen ? (
+        {/* Show full screen if in maintenance mode */}
+        {showMaintenanceModeScreen ? (
+          <MaintenanceModeScreen />
+        ) : /* Show full screen if account is blocked */
+        showAccountBlockedScreen ? (
           <AccountBlockedScreen />
         ) : (
           <>
