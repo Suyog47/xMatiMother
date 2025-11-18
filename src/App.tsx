@@ -10,10 +10,9 @@ import MainScreen from './components/Wizard';
 import AdminControl from './components/AdminControl/AdminControl';
 import Unauthorized from './components/Unauthorized/Unauthorized';
 import { hasRequiredAuthParams } from './utils/auth';
-
-// Routes to exclude from localStorage validation
-const excludedRoutes = /^\/(?:wizard|unauthorized)/
-// const excludedRoutes = ['/', '/wizard', '/unauthorized'];
+import logo from './assets/images/xmati.png';
+const packageJson = { version: '100.0.0' }
+const CURRENT_VERSION = packageJson.version
 
 // LocalStorage Invalid Dialog Component
 const LocalStorageInvalidDialog: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
@@ -68,6 +67,74 @@ const LocalStorageInvalidDialog: React.FC<{ isOpen: boolean }> = ({ isOpen }) =>
         </Button>
       </div>
     </Dialog>
+  );
+};
+
+// Account Blocked Full Screen Component
+const AccountBlockedScreen: React.FC = () => {
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        width: '100vw',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        background: 'linear-gradient(135deg, #f8f0ff 0%, #e0b3ff 100%)',
+        textAlign: 'center',
+        padding: 24,
+        boxSizing: 'border-box',
+      }}
+    >
+      <img
+        src={logo}
+        alt='xMati Logo'
+        style={{ width: 120, height: 'auto', marginBottom: 32, userSelect: 'none' }}
+        draggable={false}
+      />
+      <div
+        style={{
+          fontSize: 28,
+          fontWeight: 700,
+          color: '#7c3aed',
+          marginBottom: 16,
+        }}
+      >
+        🚫 Account Blocked
+      </div>
+      <div
+        style={{
+          fontSize: 20,
+          fontWeight: 500,
+          color: '#2d3748',
+          width: '80%',
+          maxWidth: 600,
+          lineHeight: 1.6,
+          marginBottom: 24,
+        }}
+      >
+        Your account has been temporarily blocked due to security or policy violations.
+      </div>
+      <div
+        style={{
+          background: 'rgba(255, 255, 255, 0.8)',
+          borderRadius: 8,
+          padding: 20,
+          marginBottom: 24,
+          fontSize: 16,
+          color: '#4a5568',
+          maxWidth: 500,
+        }}
+      >
+        <div style={{ marginBottom: 12 }}>
+          Please contact support for assistance or wait for the block to be lifted.
+        </div>
+        <div style={{ fontSize: 14, color: '#6b7280' }}>
+          If you believe this is an error, please reach out to our support team.
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -133,6 +200,19 @@ const ProtectedSubscriptionRoute: React.FC = () => {
 
 function App() {
   const [showInvalidStorageDialog, setShowInvalidStorageDialog] = useState(false);
+  const [showAccountBlockedScreen, setShowAccountBlockedScreen] = useState(() => {
+     // Check localStorage on initial load for blocked status
+    const savedBlockedState = localStorage.getItem('accountBlocked')
+    return savedBlockedState ? JSON.parse(savedBlockedState).isBlocked : false
+  });
+
+  // Handle block status from WebSocket
+  const handleBlockStatus = (status: string) => {
+    setShowAccountBlockedScreen(status === 'Blocked' ? true : false);
+    localStorage.setItem('accountBlocked', JSON.stringify({
+      isBlocked: status === 'Blocked' ? true : false,
+    }))
+  };
 
   // Check localStorage fields continuously using listeners
   useEffect(() => {
@@ -198,41 +278,124 @@ function App() {
     }
   }, [])
 
+    // WebSocket connection for real-time communication - keep alive regardless of which screen is shown
+  useEffect(() => {
+    const formData = JSON.parse(localStorage.getItem('formData') || '{}')
+
+    let socket: WebSocket | null = null
+    let reconnectTimeout: NodeJS.Timeout | null = null
+    let isMounted = true
+
+    const connectWebSocket = () => {
+      if (!isMounted) {
+        return
+      }
+
+      socket = new WebSocket('ws://localhost:8000')
+
+      socket.onopen = () => {
+        const userId = `${formData.email}_util`
+        socket?.send(JSON.stringify({
+          type: 'REGISTER_CHILD',
+          userId,
+          clientVersion: CURRENT_VERSION,
+        }))
+
+        // Immediately call /check-account-status after successful WebSocket connection
+        // if (!didCheckAccountRef.current) {
+        //   didCheckAccountRef.current = true
+        //   void (async () => {
+        //     try {
+        //       if (!formData.email) {
+        //         return
+        //       }
+        //       const res = await fetch(`${API_URL}/check-account-status`, {
+        //         method: 'POST',
+        //         headers: {
+        //           'Content-Type': 'application/json',
+        //           'X-App-Version': CURRENT_VERSION,
+        //         },
+        //         body: JSON.stringify({
+        //           email: formData.email,
+        //           request: 'status',
+        //         }),
+        //       })
+
+        //     } catch (err) {
+        //       // Silently ignore errors; WebSocket remains available
+        //     }
+        //   })()
+        // }
+      }
+
+      socket.onmessage = (event) => {
+        if (!isMounted) {
+          return
+        }
+        const data = JSON.parse(event.data)
+
+        switch (data.type) {
+         
+          case 'BLOCK_STATUS':
+            handleBlockStatus(data.message)
+            // console.log('user blocked')
+            break
+          default:
+            break
+        }
+      }
+
+      socket.onclose = () => {
+        if (!isMounted) {
+          return
+        }
+        reconnectTimeout = setTimeout(connectWebSocket, 1000)
+      }
+    }
+
+    connectWebSocket()
+
+    return () => {
+      isMounted = false
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout)
+      }
+      socket?.close()
+    }
+  }, [])
+
   return (
     <Router>
       <div className="App">
-        {/* Show dialog if localStorage is invalid */}
-        <LocalStorageInvalidDialog isOpen={showInvalidStorageDialog} />
-        {/* <header className="App-header">
-          <h1>xMati Mother Application</h1>
-          <nav className="nav-menu">
-            <Link to="/wizard" className="nav-link" target="_blank" rel="noopener noreferrer">Registration Wizard</Link>
-            <Link to="/admin" className="nav-link" target="_blank" rel="noopener noreferrer">Admin Control Panel</Link>
-            <Link to="/subscription" className="nav-link" target="_blank" rel="noopener noreferrer">Subscription Management</Link>
-          </nav>
-        </header> */}
+        {/* Show full screen if account is blocked */}
+        {showAccountBlockedScreen ? (
+          <AccountBlockedScreen />
+        ) : (
+          <>
+            {/* Show dialog if localStorage is invalid */}
+            <LocalStorageInvalidDialog isOpen={showInvalidStorageDialog} />
 
-        <main className="App-main">
-          <Switch>
-            <Route exact path="/">
-              <MainScreen />
-            </Route>
-            <Route path="/wizard">
-              <MainScreen />
-            </Route>
-            <Route path="/admin">
-              <ProtectedAdminRoute />
-            </Route>
-            <Route path="/subscription">
-              <ProtectedSubscriptionRoute />
-            </Route>
-            <Route path="/unauthorized">
-              <Unauthorized />
-            </Route>
-          </Switch>
-        </main>
-
-
+            <main className="App-main">
+              <Switch>
+                <Route exact path="/">
+                  <MainScreen />
+                </Route>
+                <Route path="/wizard">
+                  <MainScreen />
+                </Route>
+                <Route path="/admin">
+                  <ProtectedAdminRoute />
+                </Route>
+                <Route path="/subscription">
+                  <ProtectedSubscriptionRoute />
+                </Route>
+                <Route path="/unauthorized">
+                  <Unauthorized />
+                </Route>
+              </Switch>
+            </main>
+          </>
+        )}
       </div>
     </Router>
   );

@@ -211,13 +211,14 @@ const Subscription: FC = () => {
     setIsLoadingTransactions(true)
     try {
       const savedFormDataLocal = JSON.parse(localStorage.getItem('formData') || '{}')
-      const tokenLocal = localStorage.getItem('token') || ''
+      const token = localStorage.getItem('token') || ''
+      console.log(token)
 
       const res = await fetch(`${API_URL}/get-stripe-transactions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${tokenLocal}`,
+          'Authorization': `Bearer ${token}`,
           'X-App-Version': CURRENT_VERSION
         },
         body: JSON.stringify({ email: savedFormDataLocal.email })
