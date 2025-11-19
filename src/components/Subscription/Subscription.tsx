@@ -211,8 +211,6 @@ const Subscription: FC = () => {
     setIsLoadingTransactions(true)
     try {
       const savedFormDataLocal = JSON.parse(localStorage.getItem('formData') || '{}')
-      const token = localStorage.getItem('token') || ''
-      console.log(token)
 
       const res = await fetch(`${API_URL}/get-stripe-transactions`, {
         method: 'POST',
@@ -226,7 +224,6 @@ const Subscription: FC = () => {
 
       const data = await res.json()
 
-      console.log(data)
       if (!res.ok) {
         throw new Error(data.msg)
       }
