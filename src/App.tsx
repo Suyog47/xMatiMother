@@ -288,11 +288,10 @@ function App() {
     const validate = () => {
       const formDataRaw = localStorage.getItem('formData')
       const subDataRaw = localStorage.getItem('subData')
-      const tokenDataRaw = localStorage.getItem('token')
+      const tokenDataRaw = sessionStorage.getItem('token')
 
       const formData = safeParse(formDataRaw)
       const subData = safeParse(subDataRaw)
-      const tokenData = safeParse(tokenDataRaw)
 
       const invalid =
         !formDataRaw ||
@@ -300,7 +299,7 @@ function App() {
         !tokenDataRaw ||
         Object.keys(formData).length === 0 ||
         Object.keys(subData).length === 0 ||
-        Object.keys(tokenData).length === 0 ||
+        // Object.keys(tokenData).length === 0 ||
         !formData.email
 
       if (invalid) {
@@ -363,6 +362,8 @@ function App() {
         //   didCheckAccountRef.current = true
          
         // }
+
+        // Immediately call /check-account-status after successful WebSocket connection
          void (async () => {
             try {
               if (!formData.email) {
@@ -384,6 +385,40 @@ function App() {
               // Silently ignore errors; WebSocket remains available
             }
           })()
+
+           // get the aes key
+          // void (async () => {
+          //   try {
+          //     if (!formData.email) {
+          //       return
+          //     }
+          //     const res = await fetch(`${API_URL}/get-aes-key`, {
+          //       method: 'POST',
+          //       headers: {
+          //         'Content-Type': 'application/json',
+          //         'X-App-Version': CURRENT_VERSION,
+          //       },
+          //       body: JSON.stringify({
+          //         email: formData.email,
+          //       }),
+          //     })
+
+          //     if (res.ok) {
+          //       const data = await res.json()
+          //       if (data && (data.token || Object.keys(data).length > 0)) {
+          //         sessionStorage.setItem('aes-key', data.aesKey)
+          //       } else {
+          //         sessionStorage.setItem('aes-key', '')
+          //       }
+          //     } else {
+          //       // remove any previous token on error
+          //       sessionStorage.removeItem('aes-key')
+          //     }
+
+          //   } catch (err) {
+          //     // Silently ignore errors; WebSocket remains available
+          //   }
+          // })()
       }
 
       socket.onmessage = (event) => {

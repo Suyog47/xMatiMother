@@ -12,6 +12,7 @@ import PaymentSuccessDialog from './dialogs/PaymentSuccessDialog'
 import SubscriptionCancelConfirmDialog from './dialogs/SubscriptionCancelConfirmDialog'
 import SubscriptionCancelledDialog from './dialogs/SubscriptionCancelledDialog'
 import TransactionHistory from './TransactionHistory'
+import { encryptPayload } from '../../aes-encryption'
 
 const CURRENT_VERSION = '100.0.0'
 const API_URL = process.env.REACT_APP_API_URL || 'https://www.app.xmati.ai/apis'
@@ -21,7 +22,7 @@ const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PROMISE || 'pk_liv
 const Subscription: FC = () => {
   let savedFormData = JSON.parse(localStorage.getItem('formData') || '{}')
   const savedSubData = JSON.parse(localStorage.getItem('subData') || '{}')
-  const token = JSON.parse(localStorage.getItem('token') || '{}')
+  const token = sessionStorage.getItem('token') || ''
 
   // console.log(savedFormData, savedSubData)
   // Dummy toggle function for compatibility with existing dialogs
@@ -219,7 +220,7 @@ const Subscription: FC = () => {
           'Authorization': `Bearer ${token}`,
           'X-App-Version': CURRENT_VERSION
         },
-        body: JSON.stringify({ email: savedFormDataLocal.email })
+        body: JSON.stringify({ payload: encryptPayload({ email: savedFormDataLocal.email })})
       })
 
       const data = await res.json()
@@ -242,7 +243,7 @@ const Subscription: FC = () => {
         setTransactions(data.charges)
       }
     } catch (error) {
-      alert(error)
+      alert(`Failed to fetch transactions: ${error}`)
       console.error('Failed to fetch transactions:', error)
     } finally {
       setIsLoadingTransactions(false)

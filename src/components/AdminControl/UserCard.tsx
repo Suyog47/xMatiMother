@@ -3,6 +3,7 @@ import { confirmDialog, lang, toast } from '../../utils/shared'
 import React, { useEffect, useState } from 'react'
 import api from '../../utils/api'
 import TransactionHistory from '../Subscription/TransactionHistory'
+import { encryptPayload } from '../../aes-encryption'
 
 const packageJson = { version: '100.0.0' }
 
@@ -50,7 +51,7 @@ const UserCard: React.FC<UserCardProps> = ({ email, userData, subscriptionData, 
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   // const savedFormData = JSON.parse(localStorage.getItem('formData') || '{}')
   const savedSubData = JSON.parse(localStorage.getItem('subData') || '{}')
-  const token = JSON.parse(localStorage.getItem('token') || '{}')
+  const token = sessionStorage.getItem('token') || ''
 
   // Dummy transaction state and functions for UI demo
   const [transactions, setTransactions] = useState<any[]>([])
@@ -73,7 +74,6 @@ const UserCard: React.FC<UserCardProps> = ({ email, userData, subscriptionData, 
 
     setIsBlockActionLoading(true)
     try {
-       console.log(isUserBlocked)
       const response = await fetch(`${API_URL}/set-block-status`, {
         method: 'POST',
         headers: {
@@ -112,7 +112,7 @@ const UserCard: React.FC<UserCardProps> = ({ email, userData, subscriptionData, 
           'Authorization': `Bearer ${token}`,
           'X-App-Version': CURRENT_VERSION
         },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ payload: encryptPayload({ email }) })
       })
 
       const data = await res.json()

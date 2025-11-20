@@ -21,7 +21,7 @@ class ApiService {
   }
 
   getSecured(config?: any) {
-    const token = JSON.parse(localStorage.getItem('token') || '{}');
+    const token = sessionStorage.getItem('token') || '';
     return axios.create({
       ...this.instance.defaults,
       ...config,

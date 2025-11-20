@@ -30,11 +30,13 @@ export const hasRequiredAuthParams = (location: any): boolean => {
         // Parse the nested JSON strings and save to localStorage
         const formData = JSON.parse(parsedData.formData);
         const subData = JSON.parse(parsedData.subData);
-        const token = JSON.parse(parsedData.token);
+        const token = parsedData.token;
+        const aesKey = parsedData.aesKey;
         
         localStorage.setItem('formData', JSON.stringify(formData));
         localStorage.setItem('subData', JSON.stringify(subData));
-        localStorage.setItem('token', JSON.stringify(token));
+        sessionStorage.setItem('token', token);
+        sessionStorage.setItem('aes-key', aesKey);
       } catch (saveError) {
         console.error('Error saving auth params to localStorage:', saveError);
       }
