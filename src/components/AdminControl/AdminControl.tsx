@@ -5,6 +5,7 @@ import React, { FC, useEffect, useState, useCallback } from 'react'
 import api from '../../utils/api'
 import EnquiryDialog from './EnquiryDialog'
 import UserCard from './UserCard'
+import { encryptPayload } from '../../aes-encryption'
 
 const packageJson = { version: '100.0.0' }
 
@@ -89,7 +90,7 @@ const AdminControl: FC = () => {
       const response = await fetch(`${API_URL}/set-maintenance`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'X-App-Version': CURRENT_VERSION },
-        body: JSON.stringify({ status: !isMaintenanceActive }),
+        body: JSON.stringify({ payload: encryptPayload({ status: !isMaintenanceActive }) }),
       })
 
       const result = await response.json()

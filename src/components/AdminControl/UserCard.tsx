@@ -81,7 +81,7 @@ const UserCard: React.FC<UserCardProps> = ({ email, userData, subscriptionData, 
           'Authorization': `Bearer ${token}`,
           'X-App-Version': CURRENT_VERSION
         },
-        body: JSON.stringify({ email: userData.email, status: !isUserBlocked}),
+        body: JSON.stringify({ payload: encryptPayload({ email: userData.email, status: !isUserBlocked }) }),
       })
 
       const result = await response.json()
@@ -151,7 +151,7 @@ const UserCard: React.FC<UserCardProps> = ({ email, userData, subscriptionData, 
         'Authorization': `Bearer ${token}`,
         'X-App-Version': CURRENT_VERSION
       },
-      body: JSON.stringify({ data: transactions, email }),
+      body: JSON.stringify({ payload: encryptPayload({ data: transactions, email }) }),
     })
 
     const blob = await res.blob()

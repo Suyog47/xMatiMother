@@ -2,6 +2,7 @@ import { Button } from '@blueprintjs/core'
 import { useStripe, useElements } from '@stripe/react-stripe-js'
 import { toast } from '../../utils/shared'
 import React, { useState, useEffect } from 'react'
+import { encryptPayload } from '../../aes-encryption'
 const packageJson = { version: '100.0.0' }
 
 const CURRENT_VERSION = packageJson.version
@@ -86,7 +87,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           'Authorization': `Bearer ${token}`,
           'X-App-Version': CURRENT_VERSION
         },
-        body: JSON.stringify({ key: email, name: fullName, subscription: selectedPlan, duration: selectedDuration, amount }),
+        body: JSON.stringify({ payload: encryptPayload({ key: email, name: fullName, subscription: selectedPlan, duration: selectedDuration, amount }) }),
       })
 
       const data = await result.json()
@@ -115,7 +116,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           'Authorization': `Bearer ${token}`,
           'X-App-Version': CURRENT_VERSION
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ payload: encryptPayload({ email }) }),
       })
 
       const data = await result.json()
@@ -144,11 +145,13 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           'X-App-Version': CURRENT_VERSION
         },
         body: JSON.stringify({
-          email,
-          name: fullName,
-          subscription: savedSubData.subscription || '',
-          amount: `$${amount / 100}`,
-        }),
+          payload: encryptPayload({
+            email,
+            name: fullName,
+            subscription: savedSubData.subscription || '',
+            amount: `$${amount / 100}`,
+          })
+        })
       })
       if (!result.ok) {
         throw new Error('Failed to send payment failure email')
@@ -189,10 +192,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
             'X-App-Version': CURRENT_VERSION
           },
           body: JSON.stringify({
-            chargeId: savedSubData.transactionId,
-            reason: '-',
-            amount: `$${amount / 100}`,
-          }),
+            payload: encryptPayload({
+              chargeId: savedSubData.transactionId,
+              reason: '-',
+              amount: `$${amount / 100}`,
+            }),
+          })
         })
         const data = await result.json()
         if (!data.success) {
@@ -260,14 +265,15 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           'X-App-Version': CURRENT_VERSION
         },
         body: JSON.stringify({
-          email,
-          plan,
-          duration,
-          price,
-          isDowngrade
-        }),
+          payload: encryptPayload({
+            email,
+            plan,
+            duration,
+            price,
+            isDowngrade
+          }),
+        })
       })
-
       const res = await response.json()
 
       if (!response.ok || !res.success) {
@@ -311,6 +317,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           'X-App-Version': CURRENT_VERSION
         },
         body: JSON.stringify({
+          payload: encryptPayload({
           email: savedFormData.email,
           fullName: savedFormData.fullName,
           currentSub: savedSubData.subscription,
@@ -318,7 +325,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           amount: savedSubData.amount,
         }),
       })
-
+    })
       const res = await response.json()
 
       if (!response.ok || !res.success) {

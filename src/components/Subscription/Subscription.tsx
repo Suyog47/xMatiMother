@@ -26,7 +26,7 @@ const Subscription: FC = () => {
 
   // console.log(savedFormData, savedSubData)
   // Dummy toggle function for compatibility with existing dialogs
-  const toggle = () => {}
+  const toggle = () => { }
 
   const [actualAmount, setActualAmount] = useState<any>(null)
   const [clientSecret, setClientSecret] = useState<string>('')
@@ -172,7 +172,7 @@ const Subscription: FC = () => {
     setIsLoadingSecret(true)
     setPaymentError('')
     try {
-      savedFormData = JSON.parse(localStorage.getItem('formData') || '{}')
+      //savedFormData = JSON.parse(localStorage.getItem('formData') || '{}')
       const result = await fetch(`${API_URL}/create-payment-intent`, {
         method: 'POST',
         headers: {
@@ -181,14 +181,14 @@ const Subscription: FC = () => {
           'X-App-Version': CURRENT_VERSION
         },
         body: JSON.stringify({
-          amount: amt, currency: 'usd',
-          customerId: { id: savedFormData.stripeCustomerId },
-          paymentMethodId: savedFormData.stripePayementId,
-          email: savedFormData.email,
-          subscription: selectedTab,
-          duration: selectedDuration
-        }),
-      })
+            amount: amt, currency: 'usd',
+            customerId: { id: savedFormData.stripeCustomerId },
+            paymentMethodId: savedFormData.stripePayementId,
+            email: savedFormData.email,
+            subscription: selectedTab,
+            duration: selectedDuration
+          }),
+        })
 
       if (!result.ok) {
         throw new Error('Payment setup failed')
@@ -220,7 +220,7 @@ const Subscription: FC = () => {
           'Authorization': `Bearer ${token}`,
           'X-App-Version': CURRENT_VERSION
         },
-        body: JSON.stringify({ payload: encryptPayload({ email: savedFormDataLocal.email })})
+        body: JSON.stringify({ payload: encryptPayload({ email: savedFormDataLocal.email }) })
       })
 
       const data = await res.json()
@@ -249,7 +249,7 @@ const Subscription: FC = () => {
       setIsLoadingTransactions(false)
     }
   }, [])
-  
+
   const fetchedOnceRef = useRef(false)
   useEffect(() => {
     void getClientSecret()
@@ -281,7 +281,7 @@ const Subscription: FC = () => {
         'Authorization': `Bearer ${token}`,
         'X-App-Version': CURRENT_VERSION
       },
-      body: JSON.stringify({ data: transactions, email }),
+      body: JSON.stringify({ payload: encryptPayload({ data: transactions, email }) }),
     })
 
     const blob = await res.blob()
@@ -309,7 +309,7 @@ const Subscription: FC = () => {
             'Authorization': `Bearer ${token}`,
             'X-App-Version': CURRENT_VERSION
           },
-          body: JSON.stringify({ chargeId: savedSubData.transactionId, reason: 'by user', email, fullName, subscription, amount, refundDetails }),
+          body: JSON.stringify({ payload: encryptPayload({ chargeId: savedSubData.transactionId, reason: 'by user', email, fullName, subscription, amount, refundDetails }) }),
         })
       } else {
         res = await fetch(`${API_URL}/trial-cancellation`, {
@@ -319,7 +319,7 @@ const Subscription: FC = () => {
             'Authorization': `Bearer ${token}`,
             'X-App-Version': CURRENT_VERSION
           },
-          body: JSON.stringify({ email }),
+          body: JSON.stringify({ payload: encryptPayload({ email }) }),
         })
       }
 
@@ -580,7 +580,7 @@ const Subscription: FC = () => {
   return (
     <>
       {/* Main Screen */}
-      <div style={{ 
+      <div style={{
         minHeight: '100vh',
         backgroundColor: '#f5f8fa',
         padding: '20px'
@@ -604,11 +604,11 @@ const Subscription: FC = () => {
             gap: '12px'
           }}>
             <Icon icon="dollar" size={28} color="#2d3748" />
-            <h1 style={{ 
-              margin: 0, 
-              fontSize: '28px', 
-              fontWeight: 600, 
-              color: '#2d3748' 
+            <h1 style={{
+              margin: 0,
+              fontSize: '28px',
+              fontWeight: 600,
+              color: '#2d3748'
             }}>
               Subscribe & Pay
             </h1>
@@ -627,128 +627,104 @@ const Subscription: FC = () => {
               gap: 20,
             }}
           >
-          {/* Left: Subscription Plan Section */}
-          <div style={{ flex: 1.8, overflowY: 'auto' }}>
-            <div
-              style={{
-                marginBottom: '10px',
-                textAlign: 'center',
-                fontSize: '0.95em',
-                color: '#666',
-                lineHeight: '1.4',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'normal',
-                maxHeight: '4.5em',
-              }}
-            >
-              {subscription && expiryTill && (
-                <p style={{ margin: '0' }}>
-                  Your current subscription plan is <strong><u>{subscription}</u></strong>, valid till <strong><u>{expiryTill}</u></strong>.
-                  {subscription === 'Trial' && !savedSubData.expired && (
-                    savedFormData.nextSubs ? (
-                      <> You opted for <strong><u>{savedFormData.nextSubs.plan}</u></strong> plan on a <strong><u>{savedFormData.nextSubs.duration}</u></strong> basis after Trial, which you can change anytime.</>
-                    ) : (
-                      <> You have cancelled your subscription.</>
-                    )
-                  )}
-                  {subscription !== 'Trial' && !savedSubData.expired && (
-                    savedFormData.nextSubs ? (
-                      <> You have downgraded your plan to <strong><u>{savedFormData.nextSubs.plan}</u></strong> for the <strong><u>{savedFormData.nextSubs.duration}</u></strong> duration, which will be activated on the day of expiry.</>
-                    ) : (
-                      <></>
-                    )
-                  )}
-                </p>
-              )}
-            </div>
+            {/* Left: Subscription Plan Section */}
+            <div style={{ flex: 1.8, overflowY: 'auto' }}>
+              <div
+                style={{
+                  marginBottom: '10px',
+                  textAlign: 'center',
+                  fontSize: '0.95em',
+                  color: '#666',
+                  lineHeight: '1.4',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'normal',
+                  maxHeight: '4.5em',
+                }}
+              >
+                {subscription && expiryTill && (
+                  <p style={{ margin: '0' }}>
+                    Your current subscription plan is <strong><u>{subscription}</u></strong>, valid till <strong><u>{expiryTill}</u></strong>.
+                    {subscription === 'Trial' && !savedSubData.expired && (
+                      savedFormData.nextSubs ? (
+                        <> You opted for <strong><u>{savedFormData.nextSubs.plan}</u></strong> plan on a <strong><u>{savedFormData.nextSubs.duration}</u></strong> basis after Trial, which you can change anytime.</>
+                      ) : (
+                        <> You have cancelled your subscription.</>
+                      )
+                    )}
+                    {subscription !== 'Trial' && !savedSubData.expired && (
+                      savedFormData.nextSubs ? (
+                        <> You have downgraded your plan to <strong><u>{savedFormData.nextSubs.plan}</u></strong> for the <strong><u>{savedFormData.nextSubs.duration}</u></strong> duration, which will be activated on the day of expiry.</>
+                      ) : (
+                        <></>
+                      )
+                    )}
+                  </p>
+                )}
+              </div>
 
-            <h1 style={{ marginBottom: '5px', fontSize: '1.2em' }}>
-              {(subscription === 'Trial' && !savedSubData.expired)
-                ? 'Choose Your Subscription Plan'
-                : 'Change Your Subscription Plan'}
-            </h1>
-            <div style={{
-              display: 'flex',
-              gap: '20px',
-              marginBottom: '10px',
-              justifyContent: 'space-between'
-            }}>
-              {['Starter', 'Professional'].map((plan) => (
-                <div
-                  key={plan}
-                  onClick={() => setSelectedTab(plan)}
-                  style={{
-                    flex: 1,
-                    border: `2px solid ${selectedTab === plan ? '#2196f3' : '#e0e0e0'}`,
-                    borderRadius: '6px',
-                    padding: '15px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    backgroundColor: selectedTab === plan ? '#f8fbff' : 'white'
-                  }}
-                >
-                  <h3 style={{
-                    margin: '0',
-                    padding: '0',
-                    textAlign: 'center',
-                    fontSize: '1.1em',
-                    marginBottom: '10px'
-                  }}>
-                    {plan}
-                  </h3>
-                  <h3 style={{
-                    marginTop: 0,
-                    marginBottom: '12px',
-                    fontSize: '1.2em'
-                  }}>
-                    {plan === 'Starter' ? '$19/month' : '$45/month'} &nbsp;&nbsp; <span style={{ fontSize: '0.75em', color: '#666' }}>(Introductory price)</span>
-                  </h3>
-                  <div style={{
-                    marginBottom: '12px',
-                    padding: '10px',
-                    background: '#f8f9fa',
-                    borderRadius: '3px'
-                  }}>
-                    <strong style={{ fontSize: '0.95em' }}>
-                      {plan === 'Starter' ? '3 bots included' : '5 bots included'}
-                    </strong>
-                  </div>
-                  <div style={{ marginBottom: '15px' }}>
-                    <div style={{
-                      color: '#666',
-                      marginBottom: '10px',
-                      paddingBottom: '10px',
-                      borderBottom: '1px solid #eee',
-                      fontSize: '0.95em'
+              <h1 style={{ marginBottom: '5px', fontSize: '1.2em' }}>
+                {(subscription === 'Trial' && !savedSubData.expired)
+                  ? 'Choose Your Subscription Plan'
+                  : 'Change Your Subscription Plan'}
+              </h1>
+              <div style={{
+                display: 'flex',
+                gap: '20px',
+                marginBottom: '10px',
+                justifyContent: 'space-between'
+              }}>
+                {['Starter', 'Professional'].map((plan) => (
+                  <div
+                    key={plan}
+                    onClick={() => setSelectedTab(plan)}
+                    style={{
+                      flex: 1,
+                      border: `2px solid ${selectedTab === plan ? '#2196f3' : '#e0e0e0'}`,
+                      borderRadius: '6px',
+                      padding: '15px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      backgroundColor: selectedTab === plan ? '#f8fbff' : 'white'
+                    }}
+                  >
+                    <h3 style={{
+                      margin: '0',
+                      padding: '0',
+                      textAlign: 'center',
+                      fontSize: '1.1em',
+                      marginBottom: '10px'
                     }}>
-                      Includes:
+                      {plan}
+                    </h3>
+                    <h3 style={{
+                      marginTop: 0,
+                      marginBottom: '12px',
+                      fontSize: '1.2em'
+                    }}>
+                      {plan === 'Starter' ? '$19/month' : '$45/month'} &nbsp;&nbsp; <span style={{ fontSize: '0.75em', color: '#666' }}>(Introductory price)</span>
+                    </h3>
+                    <div style={{
+                      marginBottom: '12px',
+                      padding: '10px',
+                      background: '#f8f9fa',
+                      borderRadius: '3px'
+                    }}>
+                      <strong style={{ fontSize: '0.95em' }}>
+                        {plan === 'Starter' ? '3 bots included' : '5 bots included'}
+                      </strong>
                     </div>
-                    {['LLM Support', 'HITL (Human in the Loop) Enabled', 'Bot Analytics'].map((feature) => (
-                      <div
-                        key={feature}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          marginBottom: '6px',
-                          fontSize: '0.9em'
-                        }}
-                      >
-                        <span style={{ color: '#4caf50', marginRight: '6px' }}>✓</span>
-                        {feature}
+                    <div style={{ marginBottom: '15px' }}>
+                      <div style={{
+                        color: '#666',
+                        marginBottom: '10px',
+                        paddingBottom: '10px',
+                        borderBottom: '1px solid #eee',
+                        fontSize: '0.95em'
+                      }}>
+                        Includes:
                       </div>
-                    ))}
-                    <div style={{
-                      color: '#666',
-                      marginBottom: '10px',
-                      paddingBottom: '10px',
-                      borderBottom: '1px solid #eee',
-                      fontSize: '0.95em'
-                    }}>
-                      Supported Channels:
-                    </div>
-                    {['Whatsapp', 'Web Channel', 'Telegram', 'Slack', 'Facebook Messenger'].map((feature) => (
-                      (plan === 'Starter' && feature === 'Whatsapp') ? null : (
+                      {['LLM Support', 'HITL (Human in the Loop) Enabled', 'Bot Analytics'].map((feature) => (
                         <div
                           key={feature}
                           style={{
@@ -761,82 +737,106 @@ const Subscription: FC = () => {
                           <span style={{ color: '#4caf50', marginRight: '6px' }}>✓</span>
                           {feature}
                         </div>
-                      )
-                    ))}
+                      ))}
+                      <div style={{
+                        color: '#666',
+                        marginBottom: '10px',
+                        paddingBottom: '10px',
+                        borderBottom: '1px solid #eee',
+                        fontSize: '0.95em'
+                      }}>
+                        Supported Channels:
+                      </div>
+                      {['Whatsapp', 'Web Channel', 'Telegram', 'Slack', 'Facebook Messenger'].map((feature) => (
+                        (plan === 'Starter' && feature === 'Whatsapp') ? null : (
+                          <div
+                            key={feature}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              marginBottom: '6px',
+                              fontSize: '0.9em'
+                            }}
+                          >
+                            <span style={{ color: '#4caf50', marginRight: '6px' }}>✓</span>
+                            {feature}
+                          </div>
+                        )
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '12px',
+                  marginTop: '15px',
+                  width: '100%',
+                }}
+              >
+                <Button
+                  type="submit"
+                  intent="primary"
+                  fill
+                  style={{
+                    height: 50,
+                    fontSize: '1.1em',
+                    fontWeight: 600,
+                    borderRadius: 6,
+                    flex: 1,
+                  }}
+                  onClick={() => togglePaymentDialog(true)}
+                >
+                  Update your Subscription
+                </Button>
+
+                {savedSubData.canCancel === true &&
+                  savedSubData.isCancelled === false &&
+                  savedSubData.expired === false && (
+                    <Button
+                      intent="danger"
+                      fill
+                      style={{
+                        height: 50,
+                        fontSize: '1.1em',
+                        fontWeight: 600,
+                        borderRadius: 6,
+                        flex: 1,
+                      }}
+                      onClick={() => {
+                        setIsConfirmCancelDialogOpen(true)
+                      }}
+                      disabled={isLoadingTransactions}
+                    >
+                      Cancel Your Subscription
+                    </Button>
+                  )}
+              </div>
+
             </div>
 
+            {/* Vertical Divider */}
             <div
               style={{
-                display: 'flex',
-                gap: '12px',
-                marginTop: '15px',
-                width: '100%',
+                width: '2px',
+                minWidth: '2px',
+                background: '#e0e0e0',
+                margin: '0 16px',
+                alignSelf: 'stretch',
+                flexShrink: 0,
               }}
-            >
-              <Button
-                type="submit"
-                intent="primary"
-                fill
-                style={{
-                  height: 50,
-                  fontSize: '1.1em',
-                  fontWeight: 600,
-                  borderRadius: 6,
-                  flex: 1,
-                }}
-                onClick={() => togglePaymentDialog(true)}
-              >
-                Update your Subscription
-              </Button>
+            />
 
-              {savedSubData.canCancel === true &&
-                savedSubData.isCancelled === false &&
-                savedSubData.expired === false && (
-                  <Button
-                    intent="danger"
-                    fill
-                    style={{
-                      height: 50,
-                      fontSize: '1.1em',
-                      fontWeight: 600,
-                      borderRadius: 6,
-                      flex: 1,
-                    }}
-                    onClick={() => {
-                      setIsConfirmCancelDialogOpen(true)
-                    }}
-                    disabled={isLoadingTransactions}
-                  >
-                    Cancel Your Subscription
-                  </Button>
-                )}
-            </div>
-
+            {/* Right: Transaction History Section */}
+            <TransactionHistory
+              transactions={transactions}
+              isLoadingTransactions={isLoadingTransactions}
+              fetchTransactions={fetchTransactions}
+              downloadCSV={downloadCSV}
+            />
           </div>
-
-          {/* Vertical Divider */}
-          <div
-            style={{
-              width: '2px',
-              minWidth: '2px',
-              background: '#e0e0e0',
-              margin: '0 16px',
-              alignSelf: 'stretch',
-              flexShrink: 0,
-            }}
-          />
-
-          {/* Right: Transaction History Section */}
-          <TransactionHistory
-            transactions={transactions}
-            isLoadingTransactions={isLoadingTransactions}
-            fetchTransactions={fetchTransactions}
-            downloadCSV={downloadCSV}
-          />
-        </div>
 
         </div>
       </div>
