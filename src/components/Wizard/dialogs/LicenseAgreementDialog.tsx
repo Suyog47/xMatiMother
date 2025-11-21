@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Dialog, Button, Checkbox, Spinner } from '@blueprintjs/core'
+import { PDFDocument } from 'pdf-lib'
 
 interface LicenseAgreementDialogProps {
   isOpen: boolean
@@ -33,6 +34,49 @@ const LicenseAgreementDialog: React.FC<LicenseAgreementDialogProps> = ({
   const handleAccept = () => {
     if (isAgreed) {
       onAccept()
+    }
+  }
+
+  const handleDownload = async () => {
+    try {
+      // Fetch the license PDF
+      const licensePdfUrl = `${process.env.PUBLIC_URL || ''}/Mist_license_agreement.pdf`
+      const response = await fetch(licensePdfUrl)
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch license PDF')
+      }
+      
+      const licensePdfBytes = await response.arrayBuffer()
+      
+      // Load the PDF (we can use it as-is or modify it)
+      const licensePdf = await PDFDocument.load(licensePdfBytes)
+      
+      // Generate the final PDF
+      const pdfBytes = await licensePdf.save()
+      
+      // Create blob and download
+      const pdfArray = new Uint8Array(pdfBytes)
+      const blob = new Blob([pdfArray], { type: 'application/pdf' })
+      const url = URL.createObjectURL(blob)
+      
+      // Generate filename
+      const fileName = `xMati_License_Agreement_${new Date().toISOString().split('T')[0]}.pdf`
+      
+      // Create download link and trigger download
+      const downloadLink = document.createElement('a')
+      downloadLink.href = url
+      downloadLink.download = fileName
+      document.body.appendChild(downloadLink)
+      downloadLink.click()
+      document.body.removeChild(downloadLink)
+      
+      // Clean up
+      URL.revokeObjectURL(url)
+      
+    } catch (error) {
+      console.error('Error downloading PDF:', error)
+      alert('Error downloading PDF. Please try again.')
     }
   }
 
@@ -281,6 +325,19 @@ const LicenseAgreementDialog: React.FC<LicenseAgreementDialogProps> = ({
             display: 'flex',
             gap: '12px'
           }}>
+            <Button
+              onClick={handleDownload}
+              intent="primary"
+              style={{
+                padding: '10px 20px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}
+            >
+              Download
+            </Button>
+
             <Button
               onClick={handleClose}
               style={{

@@ -55,7 +55,11 @@ const LocalStorageInvalidDialog: React.FC<{ isOpen: boolean }> = ({ isOpen }) =>
           icon="refresh"
           intent="primary"
           large
-          onClick={() => window.close()}
+          onClick={() => {
+            window.open('', '_self')
+            window.close()
+          }
+          }
           style={{
             height: '48px',
             fontSize: '16px',
@@ -322,7 +326,7 @@ function App() {
     }
 
     let intervalId: any;
-    
+
     // Initial validation on load
     if (window.location.pathname === '/subscription' || window.location.pathname === '/unauthorized') {
       // Run validation on mount and periodically (every 5 seconds)

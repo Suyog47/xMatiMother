@@ -348,6 +348,15 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
     }
   }
 
+  const handleLicenseAccepted = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (savedSubData.subscription === 'Trial' && !savedSubData.expired && !savedSubData.isCancelled) {
+      await handleNextSubNow(e, `$${amount / 100}`);
+    } else {
+      await handleSubmit(e);
+    }
+  }
   return (
     <>
       {/* Fullscreen loader */}
@@ -519,9 +528,6 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
               (e) => {
                 e.preventDefault();
                 setIsInvoiceLicenseDialogOpen(true);
-                // savedSubData.subscription === 'Trial' && !savedSubData.expired && !savedSubData.isCancelled
-                //   ? (e) => handleNextSubNow(e, `$${amount / 100}`)
-                //   : handleSubmit
               }
             }>
 
@@ -825,7 +831,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       <SubscriptionInvoiceLicenseDialog
         isOpen={isInvoiceLicenseDialogOpen}
         invoiceDetails={invoiceDetails}
-        setIsLicenseAccepted={setIsLicenseAccepted}
+        handleLicenseAccepted={(e: any) => handleLicenseAccepted(e)}
         onClose={() => setIsInvoiceLicenseDialogOpen(false)}
       />
     </>

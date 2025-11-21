@@ -15,14 +15,14 @@ interface SubscriptionInvoiceLicenseDialogProps {
   isOpen: boolean
   invoiceDetails: InvoiceDetails
   onClose: () => void
-  setIsLicenseAccepted: (val: boolean) => void
+  handleLicenseAccepted: (e: React.FormEvent) => void
 }
 
 const SubscriptionInvoiceLicenseDialog: React.FC<SubscriptionInvoiceLicenseDialogProps> = ({
   isOpen,
   invoiceDetails,
   onClose,
-  setIsLicenseAccepted
+  handleLicenseAccepted
 }) => {
   const [pdfLoading, setPdfLoading] = useState(true)
   const [pdfError, setPdfError] = useState(false)
@@ -237,12 +237,12 @@ const SubscriptionInvoiceLicenseDialog: React.FC<SubscriptionInvoiceLicenseDialo
   //   window.location.href = mailtoUrl
   // }
 
-  const handleNext = () => {
+  const handleNext = (e: React.FormEvent) => {
     if (!isAgreed) {
       alert('Please read and accept the License Agreement before proceeding.')
       return
     }
-    setIsLicenseAccepted(true)
+    handleLicenseAccepted(e)
     onClose()
   }
 

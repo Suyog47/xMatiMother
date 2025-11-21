@@ -43,7 +43,7 @@ interface Errors {
   fullName?: string
   email?: string
   phoneNumber?: string
-  countryCode?: string 
+  countryCode?: string
   password?: string
   organisationName?: string
   industryType?: string
@@ -51,7 +51,7 @@ interface Errors {
   cardNumber?: string
   cardCVC?: string
   cardExpiry?: string
-  otp?: string 
+  otp?: string
 }
 
 const CustomerWizardForm: React.FC = () => {
@@ -368,7 +368,7 @@ const CustomerWizardForm: React.FC = () => {
   const handleLicenseAccept = async () => {
     try {
       setIsLicenseDialogOpen(false)
-      
+
       if (formData && typeof formData === 'object') {
         setIsLoading(true)
 
@@ -390,10 +390,10 @@ const CustomerWizardForm: React.FC = () => {
 
         // Step 3: Complete setup
         //await setLocalData()
-        
+
         // Show success dialog
         setIsRegistrationSuccessOpen(true)
-        
+
         // history.push({
         //   pathname: '/login',
         // })
@@ -541,7 +541,7 @@ const CustomerWizardForm: React.FC = () => {
     try {
       const result = await fetch(`${API_URL}/create-payment-intent`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-App-Version': CURRENT_VERSION},
+        headers: { 'Content-Type': 'application/json', 'X-App-Version': CURRENT_VERSION },
         body: JSON.stringify({
           amount: price * 100, currency: 'usd',
           customerId: { id: customerId },
@@ -924,7 +924,7 @@ const CustomerWizardForm: React.FC = () => {
       {/* Registration Success Dialog */}
       <Dialog
         isOpen={isRegistrationSuccessOpen}
-        onClose={() => {}}
+        onClose={() => { }}
         title=""
         canOutsideClickClose={false}
         canEscapeKeyClose={false}
@@ -939,8 +939,8 @@ const CustomerWizardForm: React.FC = () => {
         }}
       >
         {/* Header Section with Green Background */}
-        <div style={{ 
-          padding: '30px 30px 20px 30px', 
+        <div style={{
+          padding: '30px 30px 20px 30px',
           textAlign: 'center',
           background: 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)',
           color: 'white',
@@ -961,32 +961,32 @@ const CustomerWizardForm: React.FC = () => {
             ✓
           </div>
 
-          <h2 style={{ 
-            color: 'white', 
-            marginBottom: '0', 
+          <h2 style={{
+            color: 'white',
+            marginBottom: '0',
             fontSize: '28px',
-            fontWeight: '600' 
+            fontWeight: '600'
           }}>
             Registration Successful!
           </h2>
         </div>
 
         {/* Content Section with White Background */}
-        <div style={{ 
-          padding: '30px', 
+        <div style={{
+          padding: '30px',
           textAlign: 'center',
           background: 'white',
           color: '#333'
         }}>
-          
-          <p style={{ 
-            fontSize: '18px', 
+
+          <p style={{
+            fontSize: '18px',
             lineHeight: '1.6',
             marginBottom: '25px',
             color: '#555'
           }}>
             Congratulations! You have been registered successfully.<br />
-            Please login to your xMati app using the same credentials you just provided.
+            Please login to your xMati app using the same credentials you provided.
           </p>
 
           <div style={{
@@ -996,8 +996,8 @@ const CustomerWizardForm: React.FC = () => {
             borderRadius: '10px',
             marginBottom: '25px'
           }}>
-            <p style={{ 
-              fontSize: '16px', 
+            <p style={{
+              fontSize: '16px',
               margin: '0',
               color: '#495057'
             }}>
@@ -1009,8 +1009,8 @@ const CustomerWizardForm: React.FC = () => {
             large
             intent="none"
             onClick={() => {
-              // Redirect to login page
-              window.location.href = '/login'
+              window.open('', '_self')
+              window.close()
             }}
             style={{
               background: 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)',
@@ -1033,18 +1033,18 @@ const CustomerWizardForm: React.FC = () => {
               e.currentTarget.style.boxShadow = '0 4px 15px rgba(76, 175, 80, 0.3)'
             }}
           >
-          Go to Login
-        </Button>
-      </div>
-    </Dialog>
+            Close
+          </Button>
+        </div>
+      </Dialog>
 
-    {/* License Agreement Dialog */}
-    <LicenseAgreementDialog
-      isOpen={isLicenseDialogOpen}
-      onClose={handleLicenseCancel}
-      onAccept={handleLicenseAccept}
-    />
-  </div>
+      {/* License Agreement Dialog */}
+      <LicenseAgreementDialog
+        isOpen={isLicenseDialogOpen}
+        onClose={handleLicenseCancel}
+        onAccept={handleLicenseAccept}
+      />
+    </div>
   )
 }// Main wrapper component that provides Stripe Elements context
 const CustomerWizard: React.FC = () => {
