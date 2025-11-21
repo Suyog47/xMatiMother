@@ -6,7 +6,6 @@ import { loadStripe } from '@stripe/stripe-js'
 import React, { FC, useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import CheckoutForm from './CheckoutForm'
 import CancellationFailedDialog from './dialogs/CancellationFailedDialog'
-import SubscriptionInvoiceLicenseDialog from './dialogs/LicenseInvoiceDialog'
 import PaymentFailedDialog from './dialogs/PaymentFailedDialog'
 import PaymentSuccessDialog from './dialogs/PaymentSuccessDialog'
 import SubscriptionCancelConfirmDialog from './dialogs/SubscriptionCancelConfirmDialog'
@@ -42,7 +41,6 @@ const Subscription: FC = () => {
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
   const [isCancelProcessing, setIsCancelProcessing] = useState(false)
   const [selectedDuration, setSelectedDuration] = useState<string>('monthly')
-  const [isInvoiceLicenseDialogOpen, setIsInvoiceLicenseDialogOpen] = useState(false)
 
   // interface CalculatedData {
   //   status: boolean
@@ -149,15 +147,6 @@ const Subscription: FC = () => {
 
     return parseFloat(price.toFixed(2))
   }, [selectedTab, selectedDuration])
-
-  const invoiceDetails = {
-    userName: savedFormData.fullName || 'Valued Customer',
-    email: savedFormData.email || '',
-    subscriptionName: subscription || 'N/A',
-    amount: `$${amount / 100}`,
-    paymentType: calculatedData?.refund ? 'REFUNDED' : 'CHARGED',
-    duration: selectedDuration,
-  }
 
   const getClientSecret = useCallback(async () => {
     if (!isPaymentDialogOpen) {
@@ -886,7 +875,7 @@ const Subscription: FC = () => {
                 setSelectedDuration={setSelectedDuration}
                 setPaymentFailedMessage={setPaymentFailedMessage}
                 setIsPaymentFailedDialogOpen={setIsPaymentFailedDialogOpen}
-                setIsLicenseDialogOpen={setIsInvoiceLicenseDialogOpen}
+                setIsSuccessDialogOpen={setIsSuccessDialogOpen}
                 cardData={cardData}
               />
             </Elements>
@@ -899,14 +888,6 @@ const Subscription: FC = () => {
           )}
         </div>
       </Dialog>
-
-      {/* Subscription Invoice and License Dialog */}
-      <SubscriptionInvoiceLicenseDialog
-        isOpen={isInvoiceLicenseDialogOpen}
-        invoiceDetails={invoiceDetails}
-        setIsSuccessDialogOpen={setIsSuccessDialogOpen}
-        onClose={() => setIsInvoiceLicenseDialogOpen(false)}
-      />
 
       {/* Payment success dialog */}
       <PaymentSuccessDialog

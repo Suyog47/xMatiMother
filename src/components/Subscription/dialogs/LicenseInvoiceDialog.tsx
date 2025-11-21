@@ -1,4 +1,4 @@
-import { Dialog, Button, Spinner } from '@blueprintjs/core'
+import { Dialog, Button, Spinner, Checkbox } from '@blueprintjs/core'
 import React, { useState, useEffect } from 'react'
 import { PDFDocument, rgb } from 'pdf-lib'
 
@@ -15,23 +15,25 @@ interface SubscriptionInvoiceLicenseDialogProps {
   isOpen: boolean
   invoiceDetails: InvoiceDetails
   onClose: () => void
-  setIsSuccessDialogOpen: (val: boolean) => void
+  setIsLicenseAccepted: (val: boolean) => void
 }
 
 const SubscriptionInvoiceLicenseDialog: React.FC<SubscriptionInvoiceLicenseDialogProps> = ({
   isOpen,
   invoiceDetails,
   onClose,
-  setIsSuccessDialogOpen
+  setIsLicenseAccepted
 }) => {
   const [pdfLoading, setPdfLoading] = useState(true)
   const [pdfError, setPdfError] = useState(false)
+  const [isAgreed, setIsAgreed] = useState(false)
 
   // Reset state when dialog opens
   useEffect(() => {
     if (isOpen) {
       setPdfLoading(true)
       setPdfError(false)
+      setIsAgreed(false) // Reset agreement checkbox
     }
   }, [isOpen])
 
@@ -236,58 +238,27 @@ const SubscriptionInvoiceLicenseDialog: React.FC<SubscriptionInvoiceLicenseDialo
   // }
 
   const handleNext = () => {
-    setIsSuccessDialogOpen(true)
+    if (!isAgreed) {
+      alert('Please read and accept the License Agreement before proceeding.')
+      return
+    }
+    setIsLicenseAccepted(true)
     onClose()
   }
-
-  // const licenseAgreement = `
-  //   This License Agreement ("Agreement") is entered into by and between the user ("You") and the service provider ("Company"). By accessing or using the service, You agree to be bound by the terms and conditions of this Agreement. If You do not agree, do not use the service.
-
-  //   1. Grant of License
-  //   The Company grants You a non-exclusive, non-transferable, revocable license to use the service for personal or business purposes, subject to the terms of this Agreement.
-
-  //   2. Restrictions
-  //   You shall not:
-  //   - Modify, copy, or create derivative works of the service.
-  //   - Reverse engineer, decompile, or disassemble the service.
-  //   - Rent, lease, or sublicense the service to any third party.
-
-  //   3. Ownership
-  //   All intellectual property rights in the service remain the exclusive property of the Company. This Agreement does not grant You any ownership rights.
-
-  //   4. Termination
-  //   The Company may terminate this Agreement at any time if You breach any of its terms. Upon termination, You must cease all use of the service.
-
-  //   5. Disclaimer of Warranties
-  //   The service is provided "as is" without any warranties, express or implied, including but not limited to warranties of merchantability or fitness for a particular purpose.
-
-  //   6. Limitation of Liability
-  //   In no event shall the Company be liable for any indirect, incidental, or consequential damages arising out of the use or inability to use the service.
-
-  //   7. Governing Law
-  //   This Agreement shall be governed by and construed in accordance with the laws of the jurisdiction in which the Company is located.
-
-  //   8. Entire Agreement
-  //   This Agreement constitutes the entire agreement between You and the Company regarding the service and supersedes all prior agreements.
-
-  //   By using the service, You acknowledge that You have read, understood, and agree to be bound by this Agreement.
-
-  //   END OF AGREEMENT
-  // `
 
   return (
     <Dialog
       isOpen={isOpen}
       onClose={() => {
         onClose()
-        setIsSuccessDialogOpen(true)
       }}
-      title=""
+      title="License Agreement & Invoice"
       canOutsideClickClose={false}
       style={{ 
-        width: '90vw', 
-        maxWidth: '1000px', 
+        width: '90vw',
+        maxWidth: '800px',
         height: '95vh',
+        maxHeight: '93vh',
         borderRadius: '8px',
         overflow: 'hidden',
         padding: '0'
@@ -443,23 +414,61 @@ const SubscriptionInvoiceLicenseDialog: React.FC<SubscriptionInvoiceLicenseDialo
           borderTop: '2px solid #e0e0e0',
           backgroundColor: '#f8f9fa',
           display: 'flex',
-          justifyContent: 'flex-end',
-          gap: '15px',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           flexShrink: 0
         }}>
-          <Button
-            intent="primary"
-            onClick={handleDownload}
-            style={{
-              padding: '10px 20px',
+          {/* Checkbox - Left Side */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            flex: 1
+          }}>
+            <Checkbox
+              checked={isAgreed}
+              onChange={(e) => setIsAgreed(e.currentTarget.checked)}
+              style={{ marginRight: '12px' }}
+            />
+            <label style={{
               fontSize: '14px',
-              fontWeight: '600',
-              borderRadius: '6px'
+              fontWeight: '500',
+              color: '#495057',
+              cursor: 'pointer',
+              margin: 0,
+              lineHeight: '1.4'
             }}
-          >
-            Download
-          </Button>
-          {/* <Button
+            onClick={() => setIsAgreed(!isAgreed)}
+            >
+              I have read and agree to the terms and conditions of this License Agreement
+            </label>
+          </div>
+
+          {/* Vertical Divider */}
+          <div style={{
+            width: '2px',
+            height: '40px',
+            backgroundColor: '#dee2e6',
+            margin: '0 20px'
+          }}></div>
+
+          {/* Action Buttons - Right Side */}
+          <div style={{
+            display: 'flex',
+            gap: '15px'
+          }}>
+            <Button
+              intent="primary"
+              onClick={handleDownload}
+              style={{
+                padding: '10px 20px',
+                fontSize: '14px',
+                fontWeight: '600',
+                borderRadius: '6px'
+              }}
+            >
+              Download
+            </Button>
+            {/* <Button
             intent="success"
             onClick={handleSendEmail}
             style={{
@@ -471,18 +480,20 @@ const SubscriptionInvoiceLicenseDialog: React.FC<SubscriptionInvoiceLicenseDialo
           >
             Send Email
           </Button> */}
-          <Button
-            intent="warning"
-            onClick={handleNext}
-            style={{
-              padding: '10px 24px',
-              fontSize: '14px',
-              fontWeight: '600',
-              borderRadius: '6px'
-            }}
-          >
-            Next
-          </Button>
+            <Button
+              intent="warning"
+              onClick={handleNext}
+              disabled={!isAgreed}
+              style={{
+                padding: '10px 24px',
+                fontSize: '14px',
+                fontWeight: '600',
+                borderRadius: '6px'
+              }}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </div>
     </Dialog>

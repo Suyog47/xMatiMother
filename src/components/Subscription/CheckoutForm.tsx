@@ -3,10 +3,13 @@ import { useStripe, useElements } from '@stripe/react-stripe-js'
 import { toast } from '../../utils/shared'
 import React, { useState, useEffect } from 'react'
 import { encryptPayload } from '../../aes-encryption'
+import SubscriptionInvoiceLicenseDialog from './dialogs/LicenseInvoiceDialog'
 const packageJson = { version: '100.0.0' }
 
 const CURRENT_VERSION = packageJson.version
 const API_URL = process.env.REACT_APP_API_URL || 'https://www.app.xmati.ai/apis'
+
+let savedFormData = JSON.parse(localStorage.getItem('formData') || '{}')
 
 interface CheckoutFormProps {
   clientSecret: string
@@ -21,8 +24,7 @@ interface CheckoutFormProps {
   toggle: () => void
   setPaymentFailedMessage: (msg: string) => void
   setIsPaymentFailedDialogOpen: (val: boolean) => void
-  //setIsSuccessDialogOpen: (val: boolean) => void
-  setIsLicenseDialogOpen: (val: boolean) => void
+  setIsSuccessDialogOpen: (val: boolean) => void
 }
 
 const isValidClientSecret = (secret: string) => {
@@ -42,8 +44,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   toggle,
   setPaymentFailedMessage,
   setIsPaymentFailedDialogOpen,
-  //setIsSuccessDialogOpen,
-  setIsLicenseDialogOpen
+  setIsSuccessDialogOpen,
 }) => {
   const savedFormData = JSON.parse(localStorage.getItem('formData') || '{}')
   const savedSubData = JSON.parse(localStorage.getItem('subData') || '{}')
@@ -53,6 +54,8 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   const elements = useElements()
   const [error, setError] = useState<string>('')
   const [isProcessing, setIsProcessing] = useState<boolean>(false)
+  const [isLicenseAccepted, setIsLicenseAccepted] = useState<boolean>(false)
+  const [isInvoiceLicenseDialogOpen, setIsInvoiceLicenseDialogOpen] = useState(false)
   // const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null)
 
   // useEffect(() => {
@@ -72,6 +75,15 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   //   }
   //   initPaymentRequest()
   // }, [stripe, amount])
+
+  const invoiceDetails = {
+    userName: savedFormData.fullName || 'Valued Customer',
+    email: savedFormData.email || '',
+    subscriptionName: selectedPlan || 'N/A',
+    amount: `$${amount / 100}`,
+    paymentType: calculatedData?.refund ? 'REFUNDED' : 'CHARGED',
+    duration: selectedDuration,
+  }
 
   const setSubscriber = async (amount: any) => {
     try {
@@ -233,8 +245,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         await setSubscriber(`$${amount / 100}`)
       }
 
-      //setIsSuccessDialogOpen(true)
-      setIsLicenseDialogOpen(true)
+      setIsSuccessDialogOpen(true)
       await togglePaymentDialog(false)
       toggle()
     } catch (err: any) {
@@ -318,14 +329,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         },
         body: JSON.stringify({
           payload: encryptPayload({
-          email: savedFormData.email,
-          fullName: savedFormData.fullName,
-          currentSub: savedSubData.subscription,
-          daysRemaining: calculatedData?.daysRemaining,
-          amount: savedSubData.amount,
-        }),
+            email: savedFormData.email,
+            fullName: savedFormData.fullName,
+            currentSub: savedSubData.subscription,
+            daysRemaining: calculatedData?.daysRemaining,
+            amount: savedSubData.amount,
+          }),
+        })
       })
-    })
       const res = await response.json()
 
       if (!response.ok || !res.success) {
@@ -505,11 +516,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           {/* Subscription Options */}
           <form
             onSubmit={
-              savedSubData.subscription === 'Trial' && !savedSubData.expired && !savedSubData.isCancelled
-                ? (e) => handleNextSubNow(e, `$${amount / 100}`)
-                : handleSubmit
-            }
-          >
+              (e) => {
+                e.preventDefault();
+                setIsInvoiceLicenseDialogOpen(true);
+                // savedSubData.subscription === 'Trial' && !savedSubData.expired && !savedSubData.isCancelled
+                //   ? (e) => handleNextSubNow(e, `$${amount / 100}`)
+                //   : handleSubmit
+              }
+            }>
 
             <h4 style={{ textAlign: 'center', marginBottom: '10px', fontWeight: 600 }}>
               Choose Your plan billing duration
@@ -806,6 +820,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           )}
 
       </div>
+
+      {/* Subscription Invoice and License Dialog */}
+      <SubscriptionInvoiceLicenseDialog
+        isOpen={isInvoiceLicenseDialogOpen}
+        invoiceDetails={invoiceDetails}
+        setIsLicenseAccepted={setIsLicenseAccepted}
+        onClose={() => setIsInvoiceLicenseDialogOpen(false)}
+      />
     </>
   )
 }

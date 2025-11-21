@@ -21,9 +21,10 @@ export const hasRequiredAuthParams = (location: any): boolean => {
     const hasFormData = parsedData.formData && parsedData.formData !== '';
     const hasSubData = parsedData.subData && parsedData.subData !== '';
     const hasToken = parsedData.token && parsedData.token !== '';
-    
-    const isAuthorized = hasFormData && hasSubData && hasToken;
-    
+    const hasAesKey = parsedData.aesKey && parsedData.aesKey !== '';
+
+    const isAuthorized = hasFormData && hasSubData && hasToken && hasAesKey;
+
     // If authorized, save the parameters to localStorage
     if (isAuthorized) {
       try {

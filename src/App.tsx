@@ -245,7 +245,7 @@ const ProtectedSubscriptionRoute: React.FC = () => {
 function App() {
   const [showInvalidStorageDialog, setShowInvalidStorageDialog] = useState(false);
   const [showAccountBlockedScreen, setShowAccountBlockedScreen] = useState(() => {
-     // Check localStorage on initial load for blocked status
+    // Check localStorage on initial load for blocked status
     const savedBlockedState = localStorage.getItem('accountBlocked')
     //return false;
     return savedBlockedState ? JSON.parse(savedBlockedState).isBlocked : false
@@ -289,6 +289,7 @@ function App() {
       const formDataRaw = localStorage.getItem('formData')
       const subDataRaw = localStorage.getItem('subData')
       const tokenDataRaw = sessionStorage.getItem('token')
+      const aesKeyDataRaw = sessionStorage.getItem('aes-key')
 
       const formData = safeParse(formDataRaw)
       const subData = safeParse(subDataRaw)
@@ -297,9 +298,9 @@ function App() {
         !formDataRaw ||
         !subDataRaw ||
         !tokenDataRaw ||
+        !aesKeyDataRaw ||
         Object.keys(formData).length === 0 ||
         Object.keys(subData).length === 0 ||
-        // Object.keys(tokenData).length === 0 ||
         !formData.email
 
       if (invalid) {
@@ -315,14 +316,18 @@ function App() {
       }
 
       // If one of the critical keys changed
-      if (event.key === 'formData' || event.key === 'subData' || event.key === 'token') {
-        showError()
+      if (event.key === 'formData' || event.key === 'subData') {
+        validate()
       }
     }
 
+    let intervalId: any;
+    
     // Initial validation on load
     if (window.location.pathname === '/subscription' || window.location.pathname === '/unauthorized') {
+      // Run validation on mount and periodically (every 5 seconds)
       validate()
+      intervalId = setInterval(validate, 5000)
     }
 
     // Listen for storage events
@@ -330,11 +335,12 @@ function App() {
 
     // cleanup
     return () => {
+      clearInterval(intervalId);
       window.removeEventListener('storage', handleStorageChange)
     }
   }, [])
 
-    // WebSocket connection for real-time communication - keep alive regardless of which screen is shown
+  // WebSocket connection for real-time communication - keep alive regardless of which screen is shown
   useEffect(() => {
     const formData = JSON.parse(localStorage.getItem('formData') || '{}')
 
@@ -360,65 +366,65 @@ function App() {
         // Immediately call /check-account-status after successful WebSocket connection
         // if (!didCheckAccountRef.current) {
         //   didCheckAccountRef.current = true
-         
+
         // }
 
         // Immediately call /check-account-status after successful WebSocket connection
-         void (async () => {
-            try {
-              if (!formData.email) {
-                return
-              }
-              const res = await fetch(`${API_URL}/check-account-status`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'X-App-Version': CURRENT_VERSION,
-                },
-                body: JSON.stringify({
-                  email: `${formData.email}_util`,
-                  isMother: true,
-                }),
-              })
-
-            } catch (err) {
-              // Silently ignore errors; WebSocket remains available
+        void (async () => {
+          try {
+            if (!formData.email) {
+              return
             }
-          })()
+            const res = await fetch(`${API_URL}/check-account-status`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-App-Version': CURRENT_VERSION,
+              },
+              body: JSON.stringify({
+                email: `${formData.email}_util`,
+                isMother: true,
+              }),
+            })
 
-           // get the aes key
-          // void (async () => {
-          //   try {
-          //     if (!formData.email) {
-          //       return
-          //     }
-          //     const res = await fetch(`${API_URL}/get-aes-key`, {
-          //       method: 'POST',
-          //       headers: {
-          //         'Content-Type': 'application/json',
-          //         'X-App-Version': CURRENT_VERSION,
-          //       },
-          //       body: JSON.stringify({
-          //         email: formData.email,
-          //       }),
-          //     })
+          } catch (err) {
+            // Silently ignore errors; WebSocket remains available
+          }
+        })()
 
-          //     if (res.ok) {
-          //       const data = await res.json()
-          //       if (data && (data.token || Object.keys(data).length > 0)) {
-          //         sessionStorage.setItem('aes-key', data.aesKey)
-          //       } else {
-          //         sessionStorage.setItem('aes-key', '')
-          //       }
-          //     } else {
-          //       // remove any previous token on error
-          //       sessionStorage.removeItem('aes-key')
-          //     }
+        // get the aes key
+        // void (async () => {
+        //   try {
+        //     if (!formData.email) {
+        //       return
+        //     }
+        //     const res = await fetch(`${API_URL}/get-aes-key`, {
+        //       method: 'POST',
+        //       headers: {
+        //         'Content-Type': 'application/json',
+        //         'X-App-Version': CURRENT_VERSION,
+        //       },
+        //       body: JSON.stringify({
+        //         email: formData.email,
+        //       }),
+        //     })
 
-          //   } catch (err) {
-          //     // Silently ignore errors; WebSocket remains available
-          //   }
-          // })()
+        //     if (res.ok) {
+        //       const data = await res.json()
+        //       if (data && (data.token || Object.keys(data).length > 0)) {
+        //         sessionStorage.setItem('aes-key', data.aesKey)
+        //       } else {
+        //         sessionStorage.setItem('aes-key', '')
+        //       }
+        //     } else {
+        //       // remove any previous token on error
+        //       sessionStorage.removeItem('aes-key')
+        //     }
+
+        //   } catch (err) {
+        //     // Silently ignore errors; WebSocket remains available
+        //   }
+        // })()
       }
 
       socket.onmessage = (event) => {
@@ -428,7 +434,7 @@ function App() {
         const data = JSON.parse(event.data)
 
         switch (data.type) {
-         
+
           case 'BLOCK_STATUS':
             handleBlockStatus(data.message)
             // console.log('user blocked')
@@ -468,34 +474,34 @@ function App() {
         {showMaintenanceModeScreen ? (
           <MaintenanceModeScreen />
         ) : /* Show full screen if account is blocked */
-        showAccountBlockedScreen ? (
-          <AccountBlockedScreen />
-        ) : (
-          <>
-            {/* Show dialog if localStorage is invalid */}
-            <LocalStorageInvalidDialog isOpen={showInvalidStorageDialog} />
+          showAccountBlockedScreen ? (
+            <AccountBlockedScreen />
+          ) : (
+            <>
+              {/* Show dialog if localStorage is invalid */}
+              <LocalStorageInvalidDialog isOpen={showInvalidStorageDialog} />
 
-            <main className="App-main">
-              <Switch>
-                <Route exact path="/">
-                  <MainScreen />
-                </Route>
-                <Route path="/wizard">
-                  <MainScreen />
-                </Route>
-                <Route path="/admin">
-                  <ProtectedAdminRoute />
-                </Route>
-                <Route path="/subscription">
-                  <ProtectedSubscriptionRoute />
-                </Route>
-                <Route path="/unauthorized">
-                  <Unauthorized />
-                </Route>
-              </Switch>
-            </main>
-          </>
-        )}
+              <main className="App-main">
+                <Switch>
+                  <Route exact path="/">
+                    <MainScreen />
+                  </Route>
+                  <Route path="/wizard">
+                    <MainScreen />
+                  </Route>
+                  <Route path="/admin">
+                    <ProtectedAdminRoute />
+                  </Route>
+                  <Route path="/subscription">
+                    <ProtectedSubscriptionRoute />
+                  </Route>
+                  <Route path="/unauthorized">
+                    <Unauthorized />
+                  </Route>
+                </Switch>
+              </main>
+            </>
+          )}
       </div>
     </Router>
   );
