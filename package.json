@@ -2,6 +2,7 @@
   "name": "xmati-mother",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/utils",
   "dependencies": {
     "@blueprintjs/core": "^3.54.0",
     "@blueprintjs/datetime": "^3.24.1",

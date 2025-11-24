@@ -15,6 +15,7 @@ const packageJson = { version: '100.0.0' }
 const CURRENT_VERSION = packageJson.version
 
 const API_URL = process.env.REACT_APP_API_URL || 'https://www.app.xmati.ai/apis'
+const WEBSOCKET_URL = process.env.REACT_APP_WEBSOCKET_URL || 'wss://www.app.xmati.ai/apis/'
 
 // LocalStorage Invalid Dialog Component
 const LocalStorageInvalidDialog: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
@@ -357,7 +358,8 @@ function App() {
         return
       }
 
-      socket = new WebSocket('ws://localhost:8000')
+      console.log('Connecting to WebSocket:', WEBSOCKET_URL)
+      socket = new WebSocket(WEBSOCKET_URL)
 
       socket.onopen = () => {
         const userId = `${formData.email}_util`
@@ -472,7 +474,7 @@ function App() {
   }, [])
 
   return (
-    <Router>
+    <Router basename="/utils">
       <div className="App">
         {/* Show full screen if in maintenance mode */}
         {showMaintenanceModeScreen ? (
