@@ -3,6 +3,10 @@
  * @param location - Location object from React Router
  * @returns boolean - true if all required parameters are present
  */
+import * as CryptoJS from 'crypto-js';
+
+const SECRET_KEY = process.env.REACT_APP_CRYPTO_SECRET || '';
+
 export const hasRequiredAuthParams = (location: any): boolean => {
   const searchParams = new URLSearchParams(location.search);
   
@@ -15,7 +19,17 @@ export const hasRequiredAuthParams = (location: any): boolean => {
     
     // Parse the data parameter
     const decodedData = decodeURIComponent(dataParam);
-    const parsedData = JSON.parse(decodedData);
+
+    // Decrypt using CryptoJS
+    const decryptedBytes = CryptoJS.AES.decrypt(decodedData, SECRET_KEY);
+    const jsonString = decryptedBytes.toString(CryptoJS.enc.Utf8);
+    
+    if (!jsonString) {
+     console.log('Decryption failed - invalid key or data');
+     return false;
+    }
+  
+    const parsedData = JSON.parse(jsonString);
     
     // Check if formData, subData, and token exist within the data object
     const hasFormData = parsedData.formData && parsedData.formData !== '';
