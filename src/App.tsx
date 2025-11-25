@@ -187,6 +187,100 @@ const MaintenanceModeScreen: React.FC = () => {
   );
 };
 
+// Invalid Route Full Screen Component
+const InvalidRouteScreen: React.FC = () => {
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        width: '100vw',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        background: 'linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%)',
+        textAlign: 'center',
+        padding: 24,
+        boxSizing: 'border-box',
+      }}
+    >
+      <img
+        src={logo}
+        alt='xMati Logo'
+        style={{ width: 120, height: 'auto', marginBottom: 32, userSelect: 'none' }}
+        draggable={false}
+      />
+      <div
+        style={{
+          fontSize: 72,
+          marginBottom: 24,
+        }}
+      >
+        ⚠️
+      </div>
+      <div
+        style={{
+          fontSize: 28,
+          fontWeight: 700,
+          color: '#c53030',
+          marginBottom: 16,
+        }}
+      >
+        Invalid Route Detected
+      </div>
+      <div
+        style={{
+          fontSize: 20,
+          fontWeight: 500,
+          color: '#2d3748',
+          width: '80%',
+          maxWidth: 600,
+          lineHeight: 1.6,
+          marginBottom: 24,
+        }}
+      >
+        This page can only be accessed from the xMati application.
+      </div>
+      <div
+        style={{
+          background: 'rgba(255, 255, 255, 0.9)',
+          borderRadius: 8,
+          padding: 20,
+          marginBottom: 24,
+          fontSize: 16,
+          color: '#4a5568',
+          maxWidth: 500,
+        }}
+      >
+        <div style={{ marginBottom: 12 }}>
+          Please launch this utility from within your xMati desktop application.
+        </div>
+        <div style={{ fontSize: 14, color: '#6b7280' }}>
+          Direct browser access is not permitted for security reasons.
+        </div>
+      </div>
+      <Button
+        icon="cross"
+        intent="danger"
+        large
+        onClick={() => {
+          window.open('', '_self');
+          window.close();
+        }}
+        style={{
+          height: '48px',
+          fontSize: '16px',
+          fontWeight: 600,
+          borderRadius: '8px',
+          padding: '0 32px',
+        }}
+      >
+        Close Window
+      </Button>
+    </div>
+  );
+};
+
 // Protected Route Component for Admin
 const ProtectedAdminRoute: React.FC = () => {
   const location = useLocation();
@@ -245,10 +339,14 @@ const ProtectedSubscriptionRoute: React.FC = () => {
   }
 
   return <Subscription />;
-};
-
-function App() {
+};function App() {
   const [showInvalidStorageDialog, setShowInvalidStorageDialog] = useState(false);
+  const [showInvalidRouteScreen, setShowInvalidRouteScreen] = useState(() => {
+    // Check if user was already authenticated in this session
+    const isAuthenticated = sessionStorage.getItem('xmati_auth_valid');
+    // Don't show warning if already authenticated
+    return !isAuthenticated;
+  });
   const [showAccountBlockedScreen, setShowAccountBlockedScreen] = useState(() => {
     // Check localStorage on initial load for blocked status
     const savedBlockedState = localStorage.getItem('accountBlocked')
@@ -275,6 +373,53 @@ function App() {
     setShowMaintenanceModeScreen(status);
     localStorage.setItem('maintenanceMode', JSON.stringify({ isActive: status }))
   };
+
+  // Check payload on initial load - must run FIRST
+  useEffect(() => {
+    // If already authenticated in this session, skip the check
+    const isAuthenticated = sessionStorage.getItem('xmati_auth_valid');
+    if (isAuthenticated === 'true') {
+      setShowInvalidRouteScreen(false);
+      return;
+    }
+
+    const checkPayload = (event: MessageEvent) => {
+      if (event.origin === 'http://localhost:3000' && (event as any).data?.type === 'AUTH_TOKEN') {
+        const payload = (event as any).data.params;
+        console.log('From legit source');
+
+        // ✅ Store authentication status for this session
+        sessionStorage.setItem('xmati_auth_valid', 'true');
+        
+        // ✅ Remove the event listener after receiving
+        window.removeEventListener('message', checkPayload);
+        
+        // ✅ Hide the warning screen
+        setShowInvalidRouteScreen(false);
+      } else {
+        console.warn('Unauthorized message origin:', event.origin);
+        
+        // Invalid route - show full screen warning
+        setShowInvalidRouteScreen(true);
+      }
+    };
+
+    window.addEventListener('message', checkPayload);
+
+    // Optional: Add timeout only if not already authenticated
+    const timeoutId = window.setTimeout(() => {
+      const stillAuthenticated = sessionStorage.getItem('xmati_auth_valid');
+      if (stillAuthenticated !== 'true') {
+        window.removeEventListener('message', checkPayload);
+        setShowInvalidRouteScreen(true);
+      }
+    }, 5000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener('message', checkPayload);
+    };
+  }, []);
 
   // Check localStorage fields continuously using listeners
   useEffect(() => {
@@ -331,8 +476,8 @@ function App() {
     // Initial validation on load
     if (window.location.pathname === '/subscription' || window.location.pathname === '/unauthorized') {
       // Run validation on mount and periodically (every 5 seconds)
-      validate()
-      intervalId = setInterval(validate, 5000)
+      // validate()
+      // intervalId = setInterval(validate, 5000)
     }
 
     // Listen for storage events
@@ -340,7 +485,7 @@ function App() {
 
     // cleanup
     return () => {
-      clearInterval(intervalId);
+      //clearInterval(intervalId);
       window.removeEventListener('storage', handleStorageChange)
     }
   }, [])
@@ -358,7 +503,6 @@ function App() {
         return
       }
 
-      console.log('Connecting to WebSocket:', WEBSOCKET_URL)
       socket = new WebSocket(WEBSOCKET_URL)
 
       socket.onopen = () => {
@@ -476,8 +620,11 @@ function App() {
   return (
     <Router basename="/utils">
       <div className="App">
-        {/* Show full screen if in maintenance mode */}
-        {showMaintenanceModeScreen ? (
+        {/* Show full screen if invalid route detected - HIGHEST PRIORITY */}
+        {showInvalidRouteScreen ? (
+          <InvalidRouteScreen />
+        ) : /* Show full screen if in maintenance mode */
+        showMaintenanceModeScreen ? (
           <MaintenanceModeScreen />
         ) : /* Show full screen if account is blocked */
           showAccountBlockedScreen ? (
