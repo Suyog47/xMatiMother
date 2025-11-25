@@ -187,8 +187,8 @@ const MaintenanceModeScreen: React.FC = () => {
   );
 };
 
-// Invalid Route Full Screen Component
-const InvalidRouteScreen: React.FC = () => {
+// Loading Screen Component (shown while waiting for auth)
+const LoadingScreen: React.FC = () => {
   return (
     <div
       style={{
@@ -196,87 +196,89 @@ const InvalidRouteScreen: React.FC = () => {
         width: '100vw',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        background: 'linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%)',
-        textAlign: 'center',
+        background: 'linear-gradient(135deg, #f0f4f8 0%, #e0e7ef 100%)',
         padding: 24,
         boxSizing: 'border-box',
       }}
     >
-      <img
-        src={logo}
-        alt='xMati Logo'
-        style={{ width: 120, height: 'auto', marginBottom: 32, userSelect: 'none' }}
-        draggable={false}
-      />
-      <div
-        style={{
-          fontSize: 72,
-          marginBottom: 24,
-        }}
-      >
-        ⚠️
+      {/* Main content area */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+        <img
+          src={logo}
+          alt='xMati Logo'
+          style={{ width: 140, height: 'auto', marginBottom: 40, userSelect: 'none' }}
+          draggable={false}
+        />
+        
+        {/* Loading Spinner */}
+        <div
+          style={{
+            width: 60,
+            height: 60,
+            border: '4px solid rgba(124, 58, 237, 0.2)',
+            borderTop: '4px solid #7c3aed',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            marginBottom: 24,
+          }}
+        />
+        
+        <div
+          style={{
+            fontSize: 24,
+            fontWeight: 600,
+            color: '#2d3748',
+            marginBottom: 12,
+          }}
+        >
+          Loading xMati Utils...
+        </div>
+        
+        <div
+          style={{
+            fontSize: 16,
+            color: '#718096',
+            maxWidth: 400,
+            textAlign: 'center',
+          }}
+        >
+          Please wait while we initialize your session
+        </div>
       </div>
+
+      {/* Bottom warning message */}
       <div
         style={{
-          fontSize: 28,
-          fontWeight: 700,
-          color: '#c53030',
-          marginBottom: 16,
-        }}
-      >
-        Invalid Route Detected
-      </div>
-      <div
-        style={{
-          fontSize: 20,
-          fontWeight: 500,
-          color: '#2d3748',
-          width: '80%',
+          width: '100%',
           maxWidth: 600,
-          lineHeight: 1.6,
-          marginBottom: 24,
-        }}
-      >
-        This page can only be accessed from the xMati application.
-      </div>
-      <div
-        style={{
-          background: 'rgba(255, 255, 255, 0.9)',
+          padding: '16px 24px',
+          background: 'rgba(237, 242, 247, 0.7)',
           borderRadius: 8,
-          padding: 20,
-          marginBottom: 24,
-          fontSize: 16,
-          color: '#4a5568',
-          maxWidth: 500,
+          marginBottom: 20,
         }}
       >
-        <div style={{ marginBottom: 12 }}>
-          Please launch this utility from within your xMati desktop application.
-        </div>
-        <div style={{ fontSize: 14, color: '#6b7280' }}>
-          Direct browser access is not permitted for security reasons.
+        <div
+          style={{
+            fontSize: 13,
+            color: '#64748b',
+            textAlign: 'center',
+            lineHeight: 1.5,
+          }}
+        >
+          ⚠️ <strong>Note:</strong> For security reasons, this utility must be launched from within the xMati application.
+          Opening directly via browser link will not work.
         </div>
       </div>
-      <Button
-        icon="cross"
-        intent="danger"
-        large
-        onClick={() => {
-          window.open('', '_self');
-          window.close();
-        }}
-        style={{
-          height: '48px',
-          fontSize: '16px',
-          fontWeight: 600,
-          borderRadius: '8px',
-          padding: '0 32px',
-        }}
-      >
-        Close Window
-      </Button>
+
+      {/* CSS Animation for spinner */}
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };
@@ -341,10 +343,10 @@ const ProtectedSubscriptionRoute: React.FC = () => {
   return <Subscription />;
 };function App() {
   const [showInvalidStorageDialog, setShowInvalidStorageDialog] = useState(false);
-  const [showInvalidRouteScreen, setShowInvalidRouteScreen] = useState(() => {
+  const [showLoadingScreen, setShowLoadingScreen] = useState(() => {
     // Check if user was already authenticated in this session
     const isAuthenticated = sessionStorage.getItem('xmati_auth_valid');
-    // Don't show warning if already authenticated
+    // Show loading if not yet authenticated
     return !isAuthenticated;
   });
   const [showAccountBlockedScreen, setShowAccountBlockedScreen] = useState(() => {
@@ -376,10 +378,10 @@ const ProtectedSubscriptionRoute: React.FC = () => {
 
   // Check payload on initial load - must run FIRST
   useEffect(() => {
-    // If already authenticated in this session, skip the check
+    // If already authenticated in this session or is in register screen, skip the check
     const isAuthenticated = sessionStorage.getItem('xmati_auth_valid');
-    if (isAuthenticated === 'true') {
-      setShowInvalidRouteScreen(false);
+    if (isAuthenticated === 'true' || window.location.pathname === '/utils/') {
+      setShowLoadingScreen(false);
       return;
     }
 
@@ -394,29 +396,22 @@ const ProtectedSubscriptionRoute: React.FC = () => {
         // ✅ Remove the event listener after receiving
         window.removeEventListener('message', checkPayload);
         
-        // ✅ Hide the warning screen
-        setShowInvalidRouteScreen(false);
+        // ✅ Hide the loading screen
+        setShowLoadingScreen(false);
       } else {
         console.warn('Unauthorized message origin:', event.origin);
         
-        // Invalid route - show full screen warning
-        setShowInvalidRouteScreen(true);
+        // Keep showing loading screen (don't show error, just keep loading)
+        // User will see the warning message at the bottom
       }
     };
 
     window.addEventListener('message', checkPayload);
 
-    // Optional: Add timeout only if not already authenticated
-    const timeoutId = window.setTimeout(() => {
-      const stillAuthenticated = sessionStorage.getItem('xmati_auth_valid');
-      if (stillAuthenticated !== 'true') {
-        window.removeEventListener('message', checkPayload);
-        setShowInvalidRouteScreen(true);
-      }
-    }, 5000);
+    // No timeout - just keep showing loading screen
+    // The warning at the bottom tells user what's wrong
 
     return () => {
-      window.clearTimeout(timeoutId);
       window.removeEventListener('message', checkPayload);
     };
   }, []);
@@ -620,9 +615,9 @@ const ProtectedSubscriptionRoute: React.FC = () => {
   return (
     <Router basename="/utils">
       <div className="App">
-        {/* Show full screen if invalid route detected - HIGHEST PRIORITY */}
-        {showInvalidRouteScreen ? (
-          <InvalidRouteScreen />
+        {/* Show loading screen while waiting for authentication - HIGHEST PRIORITY */}
+        {showLoadingScreen ? (
+          <LoadingScreen />
         ) : /* Show full screen if in maintenance mode */
         showMaintenanceModeScreen ? (
           <MaintenanceModeScreen />
@@ -637,9 +632,6 @@ const ProtectedSubscriptionRoute: React.FC = () => {
               <main className="App-main">
                 <Switch>
                   <Route exact path="/">
-                    <MainScreen />
-                  </Route>
-                  <Route path="/wizard">
                     <MainScreen />
                   </Route>
                   <Route path="/admin">
