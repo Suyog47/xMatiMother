@@ -9,6 +9,7 @@ import Subscription from './components/Subscription/Subscription';
 import MainScreen from './components/Wizard';
 import AdminControl from './components/AdminControl/AdminControl';
 import Unauthorized from './components/Unauthorized/Unauthorized';
+import QnAGenerator from './components/QnAGenerator/QnAGenerator';
 import { hasRequiredAuthParams } from './utils/auth';
 import logo from './assets/images/xmati.png';
 const packageJson = { version: '100.0.0' }
@@ -380,7 +381,10 @@ const ProtectedSubscriptionRoute: React.FC = () => {
   useEffect(() => {
     // If already authenticated in this session or is in register screen, skip the check
     const isAuthenticated = sessionStorage.getItem('xmati_auth_valid');
-    if (isAuthenticated === 'true' || window.location.pathname === '/utils/') {
+    if (isAuthenticated === 'true' || 
+      window.location.pathname === '/utils/' || 
+      window.location.pathname === '/utils' || 
+      window.location.pathname === '/utils/generator') {
       setShowLoadingScreen(false);
       return;
     }
@@ -639,6 +643,9 @@ const ProtectedSubscriptionRoute: React.FC = () => {
                   </Route>
                   <Route path="/subscription">
                     <ProtectedSubscriptionRoute />
+                  </Route>
+                  <Route path="/generator">
+                    <QnAGenerator />
                   </Route>
                   <Route path="/unauthorized">
                     <Unauthorized />
