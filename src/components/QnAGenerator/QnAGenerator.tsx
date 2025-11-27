@@ -1,27 +1,48 @@
 import React, { useState } from 'react';
 import { InputGroup, Button, TextArea } from '@blueprintjs/core';
 import '@blueprintjs/core/lib/css/blueprint.css';
+import QnAGeneratorClass from './AI-call';
 
 const API_URL = process.env.REACT_APP_API_URL || 'https://www.app.xmati.ai/apis';
 
 const QnAGenerator: React.FC = () => {
     const [url, setUrl] = useState('');
     const [content, setContent] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleDownload = () => {
+        const blob = new Blob([content], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'qna-data.json';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
 
     const handleSubmit = async () => {
+        setLoading(true);
+        setError('');
+        setContent('');
+
         try {
+            // Step 1: Fetch content from URL
             const response = await fetch(`${API_URL}/qna-generator`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url })
             });
+
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error(`Failed to fetch URL content: ${response.statusText}`);
             }
 
             const result = await response.json();
             
-            // Format the data as Question and Answer pairs
+            // Step 2: Format the scraped content
             let formattedContent = '';
             const qnas = result.data?.qnas || [];
             
@@ -38,11 +59,24 @@ const QnAGenerator: React.FC = () => {
                 formattedContent = JSON.stringify(result.data, null, 2);
             }
 
-            console.log(JSON.stringify(result.data, null, 2));
+            // Step 3: Generate QnA using AI
+            const generator = new QnAGeneratorClass();
+            const aiResponse = await generator.generateBot(formattedContent);
             
-            setContent(formattedContent);
-        } catch (error) {
-            console.error('Error occurred while scraping:', error);
+            if (aiResponse) {
+                // Convert to pretty JSON string
+                setContent(JSON.stringify(aiResponse, null, 2));
+            } else {
+                throw new Error('AI failed to generate Q&A pairs');
+            }
+
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+            console.error('Error in QnA generation process:', errorMessage);
+            setError(errorMessage);
+            setContent(`Error: ${errorMessage}\n\nPlease try again or check the console for more details.`);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -83,6 +117,23 @@ const QnAGenerator: React.FC = () => {
                     xMati QnA Generator
                 </h1>
 
+                {error && (
+                    <div
+                        style={{
+                            width: '100%',
+                            maxWidth: '800px',
+                            padding: '12px',
+                            marginBottom: '12px',
+                            backgroundColor: '#fed7d7',
+                            color: '#c53030',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                        }}
+                    >
+                        ⚠️ {error}
+                    </div>
+                )}
+
                 <div
                     style={{
                         width: '100%',
@@ -106,8 +157,10 @@ const QnAGenerator: React.FC = () => {
                     <Button
                         large
                         intent="primary"
-                        text="Submit"
+                        text={loading ? "Generating..." : "Submit"}
                         onClick={handleSubmit}
+                        disabled={loading || !url.trim()}
+                        loading={loading}
                         style={{
                             minWidth: '120px',
                             height: '40px',
@@ -129,6 +182,27 @@ const QnAGenerator: React.FC = () => {
                     overflow: 'hidden',
                 }}
             >
+                {/* Button Container */}
+                <div
+                    style={{
+                        display: 'flex',
+                        gap: '12px',
+                        marginBottom: '16px',
+                        justifyContent: 'flex-end',
+                    }}
+                >
+                    <Button
+                        icon="download"
+                        text="Download Json file"
+                        intent="primary"
+                        onClick={handleDownload}
+                        disabled={!content}
+                        style={{
+                            minWidth: '100px',
+                        }}
+                    />
+                </div>
+
                 <TextArea
                     readOnly
                     fill
