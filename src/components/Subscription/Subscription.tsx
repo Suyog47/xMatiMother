@@ -585,7 +585,7 @@ const Subscription: FC = () => {
         }}>
           {/* Header */}
           <div style={{
-            padding: '20px 32px',
+            padding: '14px 25px',
             borderBottom: '1px solid #e1e8ed',
             backgroundColor: '#ffffff',
             display: 'flex',

@@ -31,7 +31,6 @@ const EnquiryDialog: FC<Props> = ({ isOpen, onClose }) => {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-          'X-App-Version': CURRENT_VERSION
         },
       })
       const result = await response.json()

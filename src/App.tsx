@@ -512,7 +512,6 @@ const ProtectedSubscriptionRoute: React.FC = () => {
           clientVersion: CURRENT_VERSION,
         }))
 
-        // Immediately call /check-account-status after successful WebSocket connection
         // if (!didCheckAccountRef.current) {
         //   didCheckAccountRef.current = true
 
@@ -540,40 +539,6 @@ const ProtectedSubscriptionRoute: React.FC = () => {
             // Silently ignore errors; WebSocket remains available
           }
         })()
-
-        // get the aes key
-        // void (async () => {
-        //   try {
-        //     if (!formData.email) {
-        //       return
-        //     }
-        //     const res = await fetch(`${API_URL}/get-aes-key`, {
-        //       method: 'POST',
-        //       headers: {
-        //         'Content-Type': 'application/json',
-        //         'X-App-Version': CURRENT_VERSION,
-        //       },
-        //       body: JSON.stringify({
-        //         email: formData.email,
-        //       }),
-        //     })
-
-        //     if (res.ok) {
-        //       const data = await res.json()
-        //       if (data && (data.token || Object.keys(data).length > 0)) {
-        //         sessionStorage.setItem('aes-key', data.aesKey)
-        //       } else {
-        //         sessionStorage.setItem('aes-key', '')
-        //       }
-        //     } else {
-        //       // remove any previous token on error
-        //       sessionStorage.removeItem('aes-key')
-        //     }
-
-        //   } catch (err) {
-        //     // Silently ignore errors; WebSocket remains available
-        //   }
-        // })()
       }
 
       socket.onmessage = (event) => {

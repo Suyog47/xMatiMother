@@ -79,7 +79,6 @@ const UserCard: React.FC<UserCardProps> = ({ email, userData, subscriptionData, 
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-          'X-App-Version': CURRENT_VERSION
         },
         body: JSON.stringify({ payload: encryptPayload({ email: userData.email, status: !isUserBlocked }) }),
       })

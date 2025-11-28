@@ -3,6 +3,9 @@ import { InputGroup, Button, TextArea } from '@blueprintjs/core';
 import '@blueprintjs/core/lib/css/blueprint.css';
 import QnAGeneratorClass from './AI-call';
 
+const packageJson = { version: '100.0.0' }
+
+const CURRENT_VERSION = packageJson.version
 const API_URL = process.env.REACT_APP_API_URL || 'https://www.app.xmati.ai/apis';
 
 const QnAGenerator: React.FC = () => {
@@ -32,7 +35,10 @@ const QnAGenerator: React.FC = () => {
             // Step 1: Fetch content from URL
             const response = await fetch(`${API_URL}/qna-generator`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'X-App-Version': CURRENT_VERSION,
+                 },
                 body: JSON.stringify({ url })
             });
 

@@ -514,7 +514,10 @@ const CustomerWizardForm: React.FC = () => {
       if (typeof res.setupIntent.payment_method === 'string' && res.setupIntent.payment_method) {
         result = await fetch(`${API_URL}/attach-payment-method`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-App-Version': CURRENT_VERSION },
+          headers: {
+            'Content-Type': 'application/json',
+            'X-App-Version': CURRENT_VERSION
+          },
           body: JSON.stringify({ email: formData.email, paymentMethodId: res.setupIntent.payment_method || '', customerId: { id: customerId || '' } }),
         })
       } else {

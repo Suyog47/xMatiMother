@@ -33,7 +33,10 @@ const AdminControl: FC = () => {
     try {
       const response = await fetch(`${API_URL}/get-all-users-subscriptions`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json', 'X-App-Version': CURRENT_VERSION },
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': `Bearer ${token}`
+        },
       })
       const result = await response.json()
 
@@ -89,7 +92,7 @@ const AdminControl: FC = () => {
     try {
       const response = await fetch(`${API_URL}/set-maintenance`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'X-App-Version': CURRENT_VERSION },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ payload: encryptPayload({ status: !isMaintenanceActive }) }),
       })
 
