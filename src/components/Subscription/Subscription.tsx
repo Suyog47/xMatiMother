@@ -663,81 +663,86 @@ const Subscription: FC = () => {
                 marginBottom: '10px',
                 justifyContent: 'space-between'
               }}>
-                {['Starter', 'Professional'].map((plan) => (
-                  <div
-                    key={plan}
-                    onClick={() => setSelectedTab(plan)}
-                    style={{
-                      flex: 1,
-                      border: `2px solid ${selectedTab === plan ? '#2196f3' : '#e0e0e0'}`,
-                      borderRadius: '6px',
-                      padding: '15px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      backgroundColor: selectedTab === plan ? '#f8fbff' : 'white'
-                    }}
-                  >
-                    <h3 style={{
-                      margin: '0',
-                      padding: '0',
-                      textAlign: 'center',
-                      fontSize: '1.1em',
-                      marginBottom: '10px'
-                    }}>
-                      {plan}
-                    </h3>
-                    <h3 style={{
-                      marginTop: 0,
-                      marginBottom: '12px',
-                      fontSize: '1.2em'
-                    }}>
-                      {plan === 'Starter' ? '$19/month' : '$45/month'} &nbsp;&nbsp; <span style={{ fontSize: '0.75em', color: '#666' }}>(Introductory price)</span>
-                    </h3>
-                    <div style={{
-                      marginBottom: '12px',
-                      padding: '10px',
-                      background: '#f8f9fa',
-                      borderRadius: '3px'
-                    }}>
-                      <strong style={{ fontSize: '0.95em' }}>
-                        {plan === 'Starter' ? '3 bots included' : '5 bots included'}
-                      </strong>
-                    </div>
-                    <div style={{ marginBottom: '15px' }}>
-                      <div style={{
-                        color: '#666',
-                        marginBottom: '10px',
-                        paddingBottom: '10px',
-                        borderBottom: '1px solid #eee',
-                        fontSize: '0.95em'
-                      }}>
-                        Includes:
-                      </div>
-                      {['LLM Support', 'HITL (Human in the Loop) Enabled', 'Bot Analytics'].map((feature) => (
+                {['Starter', 'Professional'].map((plan) => {
+                  const isStarterDisabled = subscription === 'Trial' && plan === 'Starter'
+                  return (
+                    <div
+                      key={plan}
+                      onClick={() => {
+                        if (!isStarterDisabled) {
+                          setSelectedTab(plan)
+                        }
+                      }}
+                      style={{
+                        position: 'relative',
+                        flex: 1,
+                        border: `2px solid ${selectedTab === plan ? '#2196f3' : '#e0e0e0'}`,
+                        borderRadius: '6px',
+                        padding: '15px',
+                        cursor: isStarterDisabled ? 'not-allowed' : 'pointer',
+                        transition: 'all 0.2s ease',
+                        backgroundColor: selectedTab === plan ? '#f8fbff' : 'white',
+                        opacity: isStarterDisabled ? 0.5 : 1,
+                      }}
+                    >
+                      {isStarterDisabled && (
                         <div
-                          key={feature}
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            marginBottom: '6px',
-                            fontSize: '0.9em'
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                            padding: '10px 14px',
+                            borderRadius: '4px',
+                            fontSize: '0.9em',
+                            fontWeight: 700,
+                            color: '#e53e3e',
+                            textAlign: 'center',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                            zIndex: 2,
                           }}
                         >
-                          <span style={{ color: '#4caf50', marginRight: '6px' }}>✓</span>
-                          {feature}
+                          Starter is not available under Trial
                         </div>
-                      ))}
-                      <div style={{
-                        color: '#666',
-                        marginBottom: '10px',
-                        paddingBottom: '10px',
-                        borderBottom: '1px solid #eee',
-                        fontSize: '0.95em'
+                      )}
+                      <h3 style={{
+                        margin: '0',
+                        padding: '0',
+                        textAlign: 'center',
+                        fontSize: '1.1em',
+                        marginBottom: '10px'
                       }}>
-                        Supported Channels:
+                        {plan}
+                      </h3>
+                      <h3 style={{
+                        marginTop: 0,
+                        marginBottom: '12px',
+                        fontSize: '1.2em'
+                      }}>
+                        {plan === 'Starter' ? '$19/month' : '$45/month'} &nbsp;&nbsp; <span style={{ fontSize: '0.75em', color: '#666' }}>(Introductory price)</span>
+                      </h3>
+                      <div style={{
+                        marginBottom: '12px',
+                        padding: '10px',
+                        background: '#f8f9fa',
+                        borderRadius: '3px'
+                      }}>
+                        <strong style={{ fontSize: '0.95em' }}>
+                          {plan === 'Starter' ? '3 bots included' : '5 bots included'}
+                        </strong>
                       </div>
-                      {['Whatsapp', 'Web Channel', 'Telegram', 'Slack', 'Facebook Messenger'].map((feature) => (
-                        (plan === 'Starter' && feature === 'Whatsapp') ? null : (
+                      <div style={{ marginBottom: '15px' }}>
+                        <div style={{
+                          color: '#666',
+                          marginBottom: '10px',
+                          paddingBottom: '10px',
+                          borderBottom: '1px solid #eee',
+                          fontSize: '0.95em'
+                        }}>
+                          Includes:
+                        </div>
+                        {['LLM Support', 'HITL (Human in the Loop) Enabled', 'Bot Analytics'].map((feature) => (
                           <div
                             key={feature}
                             style={{
@@ -750,11 +755,36 @@ const Subscription: FC = () => {
                             <span style={{ color: '#4caf50', marginRight: '6px' }}>✓</span>
                             {feature}
                           </div>
-                        )
-                      ))}
+                        ))}
+                        <div style={{
+                          color: '#666',
+                          marginBottom: '10px',
+                          paddingBottom: '10px',
+                          borderBottom: '1px solid #eee',
+                          fontSize: '0.95em'
+                        }}>
+                          Supported Channels:
+                        </div>
+                        {['Whatsapp', 'Web Channel', 'Telegram', 'Slack', 'Facebook Messenger'].map((feature) => (
+                          (plan === 'Starter' && feature === 'Whatsapp') ? null : (
+                            <div
+                              key={feature}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                marginBottom: '6px',
+                                fontSize: '0.9em'
+                              }}
+                            >
+                              <span style={{ color: '#4caf50', marginRight: '6px' }}>✓</span>
+                              {feature}
+                            </div>
+                          )
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
 
               <div

@@ -48,34 +48,7 @@ const QnAGenerator: React.FC = () => {
 
             const result = await response.json();
             
-            // Step 2: Format the scraped content
-            let formattedContent = '';
-            const qnas = result.data?.qnas || [];
-            
-            if (Array.isArray(qnas) && qnas.length > 0) {
-                qnas.forEach((item: any, index: number) => {
-                    const questions = item.data?.questions?.en || [];
-                    const answers = item.data?.answers?.en || [];
-                    
-                    formattedContent += `Q${index + 1}: ${questions.join(', ')}\n\n`;
-                    formattedContent += `A${index + 1}: ${answers.join(' ')}\n\n`;
-                    formattedContent += '---\n\n';
-                });
-            } else {
-                formattedContent = JSON.stringify(result.data, null, 2);
-            }
-
-            // Step 3: Generate QnA using AI
-            const generator = new QnAGeneratorClass();
-            const aiResponse = await generator.generateBot(formattedContent);
-            
-            if (aiResponse) {
-                // Convert to pretty JSON string
-                setContent(JSON.stringify(aiResponse, null, 2));
-            } else {
-                throw new Error('AI failed to generate Q&A pairs');
-            }
-
+            setContent(JSON.stringify(result.data, null, 2)); 
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
             console.error('Error in QnA generation process:', errorMessage);
